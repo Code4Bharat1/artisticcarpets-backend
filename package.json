@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/Code4Bharat1/artisticcarpets-backend/issues"
   },
-  "homepage": "https://github.com/Code4Bharat1/artisticcarpets-backend#readme"
+  "homepage": "https://github.com/Code4Bharat1/artisticcarpets-backend#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
 }
