@@ -1,473 +1,1030 @@
 {
   "info": {
-    "name": "Artistic Carpets — API",
-    "description": "Complete Postman collection for the Carpet E-commerce Backend (Auth + Product APIs)",
+    "name": "Artistic Carpets — Full API v1",
+    "description": "Complete Postman collection for the Artistic Carpets backend. Base: http://localhost:5000/api/v1",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "BASE_URL", "value": "http://localhost:5000" },
-    { "key": "ADMIN_TOKEN", "value": "<paste_your_admin_jwt_here>" },
-    { "key": "USER_TOKEN", "value": "<paste_your_user_jwt_here>" },
-    { "key": "PRODUCT_ID", "value": "<paste_product_id_here>" },
-    { "key": "PRODUCT_SLUG", "value": "<paste_product_slug_here>" }
+    { "key": "BASE_URL",       "value": "http://localhost:5000" },
+    { "key": "API",            "value": "{{BASE_URL}}/api/v1" },
+    { "key": "ADMIN_TOKEN",    "value": "" },
+    { "key": "USER_TOKEN",     "value": "" },
+    { "key": "PRODUCT_ID",     "value": "" },
+    { "key": "PRODUCT_SLUG",   "value": "" },
+    { "key": "ORDER_ID",       "value": "" },
+    { "key": "USER_ID",        "value": "" },
+    { "key": "CATEGORY_ID",    "value": "" },
+    { "key": "COLLECTION_ID",  "value": "" },
+    { "key": "COUPON_ID",      "value": "" },
+    { "key": "REVIEW_ID",      "value": "" },
+    { "key": "BLOG_ID",        "value": "" },
+    { "key": "ARTISAN_ID",     "value": "" },
+    { "key": "MEDIA_ID",       "value": "" }
   ],
   "item": [
+
     {
-      "name": "Auth",
+      "name": "🔐 Auth",
       "item": [
         {
-          "name": "Admin Auth",
-          "item": [
-            {
-              "name": "Register Admin",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Super Admin\",\n  \"email\": \"admin@artisticcarpets.com\",\n  \"phoneNumber\": \"+919876543210\",\n  \"password\": \"Admin@123\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/admin/register",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "admin", "register"]
-                },
-                "description": "Register a new admin. Returns JWT on success."
-              }
-            },
-            {
-              "name": "Login Admin",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"identifier\": \"admin@artisticcarpets.com\",\n  \"password\": \"Admin@123\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/admin/login",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "admin", "login"]
-                },
-                "description": "Login with email or phone number. Copy token to ADMIN_TOKEN variable."
-              }
-            },
-            {
-              "name": "Logout Admin",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
-                "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/admin/logout",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "admin", "logout"]
-                },
-                "description": "Logout the authenticated admin."
-              }
-            },
-            {
-              "name": "Get Admin Profile (Me)",
-              "request": {
-                "method": "GET",
-                "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/me",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "me"]
-                },
-                "description": "Returns the currently authenticated admin's profile."
-              }
-            }
-          ]
-        },
-        {
-          "name": "User Auth",
-          "item": [
-            {
-              "name": "Register User",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phoneNumber\": \"+919876543211\",\n  \"password\": \"User@123\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/user/register",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "user", "register"]
-                },
-                "description": "Register a new user. Returns JWT on success."
-              }
-            },
-            {
-              "name": "Login User",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"identifier\": \"john@example.com\",\n  \"password\": \"User@123\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/user/login",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "user", "login"]
-                },
-                "description": "Login with email or phone number. Copy token to USER_TOKEN variable."
-              }
-            },
-            {
-              "name": "Logout User",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
-                "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/user/logout",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "user", "logout"]
-                },
-                "description": "Logout the authenticated user."
-              }
-            },
-            {
-              "name": "Get User Profile (Me)",
-              "request": {
-                "method": "GET",
-                "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/me",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "me"]
-                },
-                "description": "Returns the currently authenticated user's profile."
-              }
-            }
-          ]
-        },
-        {
-          "name": "Shared Auth",
-          "item": [
-            {
-              "name": "Refresh Token",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"token\": \"{{ADMIN_TOKEN}}\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/refresh-token",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "refresh-token"]
-                },
-                "description": "Issue a fresh JWT from an existing (even expired) token. Works for both admin and user tokens."
-              }
-            },
-            {
-              "name": "Change Password",
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"oldPassword\": \"Admin@123\",\n  \"newPassword\": \"NewAdmin@456\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/change-password",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "change-password"]
-                },
-                "description": "Change password for the authenticated user or admin. Requires valid JWT."
-              }
-            },
-            {
-              "name": "Forgot Password",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"admin@artisticcarpets.com\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/forgot-password",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "forgot-password"]
-                },
-                "description": "Initiate password reset. Returns a resetToken (placeholder — implement email in production)."
-              }
-            },
-            {
-              "name": "Reset Password",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"admin@artisticcarpets.com\",\n  \"resetToken\": \"123456\",\n  \"newPassword\": \"ResetAdmin@789\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/reset-password",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "reset-password"]
-                },
-                "description": "Reset password using the token from Forgot Password."
-              }
-            },
-            {
-              "name": "Send OTP",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"phoneNumber\": \"+919876543210\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/send-otp",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "send-otp"]
-                },
-                "description": "Send a one-time password (OTP) to the given phone number for verification or login."
-              }
-            },
-            {
-              "name": "Verify OTP",
-              "request": {
-                "method": "POST",
-                "header": [{ "key": "Content-Type", "value": "application/json" }],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"phoneNumber\": \"+919876543210\",\n  \"otp\": \"123456\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{BASE_URL}}/api/auth/verify-otp",
-                  "host": ["{{BASE_URL}}"],
-                  "path": ["api", "auth", "verify-otp"]
-                },
-                "description": "Verify the OTP sent to the phone number. Returns a JWT on success."
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Admin",
-      "item": [
-        {
-          "name": "Create Product",
+          "name": "Register",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{ADMIN_TOKEN}}"
-              }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                { "key": "title", "value": "Persian Hand-Knotted Carpet", "type": "text" },
-                { "key": "shortDescription", "value": "Luxurious hand-knotted Persian carpet.", "type": "text" },
-                { "key": "description", "value": "A beautiful hand-knotted carpet crafted by artisans in Iran with premium wool.", "type": "text" },
-                { "key": "category", "value": "Persian Carpets", "type": "text" },
-                { "key": "subCategory", "value": "Hand-Knotted", "type": "text" },
-                { "key": "collection", "value": "Royal Heritage", "type": "text" },
-                { "key": "price", "value": "25000", "type": "text" },
-                { "key": "discountPrice", "value": "21000", "type": "text" },
-                { "key": "stock", "value": "15", "type": "text" },
-                { "key": "material", "value": "Wool", "type": "text" },
-                { "key": "size", "value": "6x9 ft", "type": "text" },
-                { "key": "shape", "value": "Rectangle", "type": "text" },
-                { "key": "color", "value": "Red & Gold", "type": "text" },
-                { "key": "style", "value": "Traditional", "type": "text" },
-                { "key": "room", "value": "Living Room", "type": "text" },
-                { "key": "origin", "value": "Iran", "type": "text" },
-                { "key": "weavingType", "value": "Hand-Knotted", "type": "text" },
-                { "key": "pileHeight", "value": "10mm", "type": "text" },
-                { "key": "weight", "value": "4.5 kg", "type": "text" },
-                { "key": "isFeatured", "value": "true", "type": "text" },
-                { "key": "isTrending", "value": "false", "type": "text" },
-                { "key": "isBestSeller", "value": "false", "type": "text" },
-                { "key": "isNewArrival", "value": "true", "type": "text" },
-                { "key": "status", "value": "active", "type": "text" },
-                { "key": "metaTitle", "value": "Buy Persian Hand-Knotted Carpet | Artistic Carpets", "type": "text" },
-                { "key": "metaDescription", "value": "Shop premium Persian hand-knotted carpets for your living room.", "type": "text" },
-                { "key": "metaKeywords", "value": "persian carpet, hand knotted, wool carpet", "type": "text" },
-                { "key": "thumbnail", "src": "/path/to/thumbnail.jpg", "type": "file" },
-                { "key": "images", "src": "/path/to/image1.jpg", "type": "file" },
-                { "key": "images", "src": "/path/to/image2.jpg", "type": "file" }
-              ]
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Secret@123\",\n  \"phone\": \"+919876543210\"\n}"
             },
-            "url": {
-              "raw": "{{BASE_URL}}/api/admin/products",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "admin", "products"]
-            },
-            "description": "Create a new product. Requires Admin JWT token."
+            "url": { "raw": "{{API}}/auth/register", "host": ["{{API}}"], "path": ["auth","register"] }
           }
         },
         {
-          "name": "Update Product",
+          "name": "Login",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const r = pm.response.json();",
+            "if (r.accessToken) {",
+            "  pm.collectionVariables.set('USER_TOKEN', r.accessToken);",
+            "  if (r.user && (r.user.role === 'admin' || r.user.role === 'super_admin')) {",
+            "    pm.collectionVariables.set('ADMIN_TOKEN', r.accessToken);",
+            "  }",
+            "}"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Secret@123\"\n}"
+            },
+            "url": { "raw": "{{API}}/auth/login", "host": ["{{API}}"], "path": ["auth","login"] }
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const r = pm.response.json();",
+            "if (r.accessToken) pm.collectionVariables.set('ADMIN_TOKEN', r.accessToken);"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"email\": \"admin@artisticcarpets.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": { "raw": "{{API}}/auth/login", "host": ["{{API}}"], "path": ["auth","login"] }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "url": { "raw": "{{API}}/auth/me", "host": ["{{API}}"], "path": ["auth","me"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{API}}/auth/refresh-token", "host": ["{{API}}"], "path": ["auth","refresh-token"] },
+            "description": "Uses httpOnly cookie automatically. No body needed."
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{API}}/auth/verify-email?token=PASTE_TOKEN_HERE", "host": ["{{API}}"], "path": ["auth","verify-email"], "query": [{ "key": "token", "value": "PASTE_TOKEN_HERE" }] }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": { "raw": "{{API}}/auth/forgot-password", "host": ["{{API}}"], "path": ["auth","forgot-password"] }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"password\": \"NewSecret@456\"\n}"
+            },
+            "url": { "raw": "{{API}}/auth/reset-password?token=PASTE_RESET_TOKEN", "host": ["{{API}}"], "path": ["auth","reset-password"], "query": [{ "key": "token", "value": "PASTE_RESET_TOKEN" }] }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"currentPassword\": \"Secret@123\",\n  \"newPassword\": \"NewSecret@456\"\n}"
+            },
+            "url": { "raw": "{{API}}/auth/change-password", "host": ["{{API}}"], "path": ["auth","change-password"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "url": { "raw": "{{API}}/auth/logout", "host": ["{{API}}"], "path": ["auth","logout"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👤 Users",
+      "item": [
+        {
+          "name": "Update My Profile",
           "request": {
             "method": "PUT",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                { "key": "title", "value": "Updated Persian Carpet", "type": "text" },
-                { "key": "price", "value": "22000", "type": "text" },
-                { "key": "discountPrice", "value": "19000", "type": "text" },
-                { "key": "stock", "value": "20", "type": "text" },
-                { "key": "isFeatured", "value": "true", "type": "text" },
-                { "key": "thumbnail", "src": "/path/to/new-thumbnail.jpg", "type": "file" }
-              ]
-            },
-            "url": {
-              "raw": "{{BASE_URL}}/api/admin/products/{{PRODUCT_ID}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "admin", "products", "{{PRODUCT_ID}}"]
-            },
-            "description": "Update product fields. Omit file fields to keep existing images."
+            "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "firstName", "value": "John", "type": "text" },
+              { "key": "lastName",  "value": "Doe",  "type": "text" },
+              { "key": "phone",     "value": "+919876543210", "type": "text" },
+              { "key": "avatar",    "type": "file", "src": [] }
+            ]},
+            "url": { "raw": "{{API}}/users/profile", "host": ["{{API}}"], "path": ["users","profile"] }
           }
         },
         {
-          "name": "Delete Product",
+          "name": "Get Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "url": { "raw": "{{API}}/users/wishlist", "host": ["{{API}}"], "path": ["users","wishlist"] }
+          }
+        },
+        {
+          "name": "Toggle Wishlist Product",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "url": { "raw": "{{API}}/users/wishlist/{{PRODUCT_ID}}", "host": ["{{API}}"], "path": ["users","wishlist","{{PRODUCT_ID}}"] }
+          }
+        },
+        {
+          "name": "Add Address",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"label\": \"Home\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+919876543210\",\n  \"addressLine1\": \"12 MG Road\",\n  \"city\": \"Mumbai\",\n  \"state\": \"Maharashtra\",\n  \"postalCode\": \"400001\",\n  \"country\": \"India\",\n  \"isDefault\": true\n}"
+            },
+            "url": { "raw": "{{API}}/users/addresses", "host": ["{{API}}"], "path": ["users","addresses"] }
+          }
+        },
+        {
+          "name": "Update Address",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"city\": \"Delhi\",\n  \"isDefault\": false\n}"
+            },
+            "url": { "raw": "{{API}}/users/addresses/ADDRESS_ID_HERE", "host": ["{{API}}"], "path": ["users","addresses","ADDRESS_ID_HERE"] }
+          }
+        },
+        {
+          "name": "Delete Address",
           "request": {
             "method": "DELETE",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }
-            ],
-            "url": {
-              "raw": "{{BASE_URL}}/api/admin/products/{{PRODUCT_ID}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "admin", "products", "{{PRODUCT_ID}}"]
+            "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "url": { "raw": "{{API}}/users/addresses/ADDRESS_ID_HERE", "host": ["{{API}}"], "path": ["users","addresses","ADDRESS_ID_HERE"] }
+          }
+        },
+        {
+          "name": "[Admin] List All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/users?page=1&limit=20&role=customer", "host": ["{{API}}"], "path": ["users"], "query": [
+              { "key": "page", "value": "1" }, { "key": "limit", "value": "20" },
+              { "key": "role", "value": "customer" }, { "key": "search", "value": "", "disabled": true },
+              { "key": "isVIP", "value": "true", "disabled": true }
+            ]}
+          }
+        },
+        {
+          "name": "[Admin] Get User Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/users/stats", "host": ["{{API}}"], "path": ["users","stats"] }
+          }
+        },
+        {
+          "name": "[Admin] Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/users/{{USER_ID}}", "host": ["{{API}}"], "path": ["users","{{USER_ID}}"] }
+          }
+        },
+        {
+          "name": "[Admin] Update User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"isVIP\": true,\n  \"loyaltyPoints\": 500,\n  \"loyaltyTier\": \"Gold\",\n  \"adminNotes\": \"VIP customer\"\n}"
             },
-            "description": "Delete product + all local image files."
+            "url": { "raw": "{{API}}/users/{{USER_ID}}", "host": ["{{API}}"], "path": ["users","{{USER_ID}}"] }
+          }
+        },
+        {
+          "name": "[Admin] Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/users/{{USER_ID}}", "host": ["{{API}}"], "path": ["users","{{USER_ID}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🛋️ Products",
+      "item": [
+        {
+          "name": "Get All Products (Public)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{API}}/products?page=1&limit=12&sort=-createdAt", "host": ["{{API}}"], "path": ["products"], "query": [
+              { "key": "page",       "value": "1" },
+              { "key": "limit",      "value": "12" },
+              { "key": "sort",       "value": "-createdAt" },
+              { "key": "search",     "value": "", "disabled": true },
+              { "key": "category",   "value": "", "disabled": true },
+              { "key": "collection", "value": "", "disabled": true },
+              { "key": "material",   "value": "", "disabled": true },
+              { "key": "shape",      "value": "", "disabled": true },
+              { "key": "minPrice",   "value": "", "disabled": true },
+              { "key": "maxPrice",   "value": "", "disabled": true },
+              { "key": "inStock",    "value": "true", "disabled": true },
+              { "key": "isFeatured", "value": "true", "disabled": true }
+            ]}
+          }
+        },
+        {
+          "name": "Get Product By Slug (Public)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{API}}/products/slug/{{PRODUCT_SLUG}}", "host": ["{{API}}"], "path": ["products","slug","{{PRODUCT_SLUG}}"] }
+          }
+        },
+        {
+          "name": "[Admin] Get Product Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/products/stats", "host": ["{{API}}"], "path": ["products","stats"] }
+          }
+        },
+        {
+          "name": "[Admin] Get Product By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/products/{{PRODUCT_ID}}", "host": ["{{API}}"], "path": ["products","{{PRODUCT_ID}}"] }
+          }
+        },
+        {
+          "name": "[Admin] Create Product",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "name",             "value": "Persian Hand-Knotted Carpet",   "type": "text" },
+              { "key": "shortDescription", "value": "Luxurious hand-knotted rug.",   "type": "text" },
+              { "key": "description",      "value": "Crafted by artisans in Kashmir with premium wool.", "type": "text" },
+              { "key": "category",         "value": "CATEGORY_ID_HERE",              "type": "text" },
+              { "key": "collection",       "value": "COLLECTION_ID_HERE",            "type": "text" },
+              { "key": "material",         "value": "Wool",                          "type": "text" },
+              { "key": "origin",           "value": "Kashmir",                       "type": "text" },
+              { "key": "shape",            "value": "Rectangular",                   "type": "text" },
+              { "key": "price",            "value": "25000",                         "type": "text" },
+              { "key": "discountPrice",    "value": "21000",                         "type": "text" },
+              { "key": "costPrice",        "value": "15000",                         "type": "text" },
+              { "key": "stock",            "value": "15",                            "type": "text" },
+              { "key": "minimumStock",     "value": "3",                             "type": "text" },
+              { "key": "weight",           "value": "4500",                          "type": "text" },
+              { "key": "isFeatured",       "value": "true",                          "type": "text" },
+              { "key": "isNewArrival",     "value": "true",                          "type": "text" },
+              { "key": "metaTitle",        "value": "Buy Persian Carpet | Artistic Carpets", "type": "text" },
+              { "key": "images",           "type": "file", "src": [] },
+              { "key": "images",           "type": "file", "src": [] }
+            ]},
+            "url": { "raw": "{{API}}/products", "host": ["{{API}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "[Admin] Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "price",      "value": "23000", "type": "text" },
+              { "key": "stock",      "value": "20",    "type": "text" },
+              { "key": "isFeatured", "value": "true",  "type": "text" }
+            ]},
+            "url": { "raw": "{{API}}/products/{{PRODUCT_ID}}", "host": ["{{API}}"], "path": ["products","{{PRODUCT_ID}}"] }
+          }
+        },
+        {
+          "name": "[Admin] Archive Product",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/products/{{PRODUCT_ID}}/archive", "host": ["{{API}}"], "path": ["products","{{PRODUCT_ID}}","archive"] }
+          }
+        },
+        {
+          "name": "[Admin] Restore Product",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/products/{{PRODUCT_ID}}/restore", "host": ["{{API}}"], "path": ["products","{{PRODUCT_ID}}","restore"] }
+          }
+        },
+        {
+          "name": "[Admin] Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/products/{{PRODUCT_ID}}", "host": ["{{API}}"], "path": ["products","{{PRODUCT_ID}}"] }
+          }
+        },
+        {
+          "name": "[Admin] Bulk Action",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"ids\": [\"ID1\", \"ID2\"],\n  \"action\": \"feature\"\n}"
+            },
+            "description": "Actions: feature | unfeature | activate | deactivate | archive | update_price",
+            "url": { "raw": "{{API}}/products/bulk", "host": ["{{API}}"], "path": ["products","bulk"] }
+          }
+        },
+        {
+          "name": "[Admin] Delete Product Image",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"imageUrl\": \"http://localhost:5000/uploads/products/filename.jpg\"\n}"
+            },
+            "url": { "raw": "{{API}}/products/{{PRODUCT_ID}}/images", "host": ["{{API}}"], "path": ["products","{{PRODUCT_ID}}","images"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📂 Categories",
+      "item": [
+        { "name": "Get Category Tree", "request": { "method": "GET", "url": { "raw": "{{API}}/categories/tree", "host": ["{{API}}"], "path": ["categories","tree"] } } },
+        { "name": "Get All Categories", "request": { "method": "GET", "url": { "raw": "{{API}}/categories?isActive=true", "host": ["{{API}}"], "path": ["categories"], "query": [{ "key": "isActive", "value": "true" }] } } },
+        { "name": "Get Category By Slug", "request": { "method": "GET", "url": { "raw": "{{API}}/categories/persian-carpets", "host": ["{{API}}"], "path": ["categories","persian-carpets"] } } },
+        {
+          "name": "[Admin] Create Category",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "name",        "value": "Persian Carpets",  "type": "text" },
+              { "key": "description", "value": "Hand-knotted rugs from Persia.", "type": "text" },
+              { "key": "isFeatured",  "value": "true",             "type": "text" },
+              { "key": "sortOrder",   "value": "1",                "type": "text" },
+              { "key": "image",       "type": "file", "src": [] }
+            ]},
+            "url": { "raw": "{{API}}/categories", "host": ["{{API}}"], "path": ["categories"] }
+          }
+        },
+        {
+          "name": "[Admin] Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "name", "value": "Updated Persian Carpets", "type": "text" }
+            ]},
+            "url": { "raw": "{{API}}/categories/{{CATEGORY_ID}}", "host": ["{{API}}"], "path": ["categories","{{CATEGORY_ID}}"] }
+          }
+        },
+        {
+          "name": "[Admin] Delete Category",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/categories/{{CATEGORY_ID}}", "host": ["{{API}}"], "path": ["categories","{{CATEGORY_ID}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "🎨 Collections",
+      "item": [
+        { "name": "Get All Collections", "request": { "method": "GET", "url": { "raw": "{{API}}/collections?isActive=true", "host": ["{{API}}"], "path": ["collections"], "query": [{ "key": "isActive", "value": "true" }] } } },
+        { "name": "Get Collection By Slug", "request": { "method": "GET", "url": { "raw": "{{API}}/collections/persian", "host": ["{{API}}"], "path": ["collections","persian"] } } },
+        {
+          "name": "[Admin] Create Collection",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "name",        "value": "Royal Persian", "type": "text" },
+              { "key": "subtitle",    "value": "Timeless artistry", "type": "text" },
+              { "key": "type",        "value": "Persian",       "type": "text" },
+              { "key": "isFeatured",  "value": "true",          "type": "text" },
+              { "key": "image",       "type": "file", "src": [] },
+              { "key": "bannerImage", "type": "file", "src": [] }
+            ]},
+            "url": { "raw": "{{API}}/collections", "host": ["{{API}}"], "path": ["collections"] }
+          }
+        },
+        {
+          "name": "[Admin] Update Collection",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [{ "key": "isFeatured", "value": "false", "type": "text" }]},
+            "url": { "raw": "{{API}}/collections/{{COLLECTION_ID}}", "host": ["{{API}}"], "path": ["collections","{{COLLECTION_ID}}"] }
+          }
+        },
+        {
+          "name": "[Admin] Delete Collection",
+          "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/collections/{{COLLECTION_ID}}", "host": ["{{API}}"], "path": ["collections","{{COLLECTION_ID}}"] } }
+        }
+      ]
+    },
+
+    {
+      "name": "📦 Orders",
+      "item": [
+        {
+          "name": "Place Order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"items\": [\n    { \"productId\": \"{{PRODUCT_ID}}\", \"quantity\": 1, \"size\": \"6x9 ft\", \"color\": \"Red\" }\n  ],\n  \"shippingAddress\": {\n    \"firstName\": \"John\", \"lastName\": \"Doe\",\n    \"addressLine1\": \"12 MG Road\", \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\", \"postalCode\": \"400001\",\n    \"country\": \"India\", \"phone\": \"+919876543210\"\n  },\n  \"paymentMethod\": \"cod\",\n  \"couponCode\": \"\"\n}"
+            },
+            "url": { "raw": "{{API}}/orders", "host": ["{{API}}"], "path": ["orders"] }
+          }
+        },
+        { "name": "My Orders", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }], "url": { "raw": "{{API}}/orders/my?page=1&limit=10", "host": ["{{API}}"], "path": ["orders","my"] } } },
+        { "name": "Get Order Detail", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }], "url": { "raw": "{{API}}/orders/{{ORDER_ID}}", "host": ["{{API}}"], "path": ["orders","{{ORDER_ID}}"] } } },
+        {
+          "name": "Request Refund",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"reason\": \"Product damaged on arrival.\",\n  \"amount\": 21000\n}"
+            },
+            "url": { "raw": "{{API}}/orders/{{ORDER_ID}}/refund", "host": ["{{API}}"], "path": ["orders","{{ORDER_ID}}","refund"] }
+          }
+        },
+        { "name": "[Admin] List All Orders", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/orders?page=1&limit=20&status=pending", "host": ["{{API}}"], "path": ["orders"], "query": [{ "key": "page","value":"1" },{ "key":"limit","value":"20" },{ "key":"status","value":"pending" },{ "key":"search","value":"","disabled":true },{ "key":"startDate","value":"","disabled":true },{ "key":"endDate","value":"","disabled":true }] } } },
+        { "name": "[Admin] Order Stats", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/orders/stats/overview", "host": ["{{API}}"], "path": ["orders","stats","overview"] } } },
+        { "name": "[Admin] Revenue Chart", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/orders/stats/revenue-chart?months=12", "host": ["{{API}}"], "path": ["orders","stats","revenue-chart"], "query": [{ "key":"months","value":"12" }] } } },
+        {
+          "name": "[Admin] Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"status\": \"confirmed\",\n  \"note\": \"Order verified and confirmed.\"\n}"
+            },
+            "description": "status: pending → confirmed → processing → shipped → out_for_delivery → delivered",
+            "url": { "raw": "{{API}}/orders/{{ORDER_ID}}/status", "host": ["{{API}}"], "path": ["orders","{{ORDER_ID}}","status"] }
+          }
+        },
+        {
+          "name": "[Admin] Update to Shipped",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"status\": \"shipped\",\n  \"trackingNumber\": \"BD123456789IN\",\n  \"carrier\": \"Delhivery\"\n}"
+            },
+            "url": { "raw": "{{API}}/orders/{{ORDER_ID}}/status", "host": ["{{API}}"], "path": ["orders","{{ORDER_ID}}","status"] }
+          }
+        },
+        {
+          "name": "[Admin] Add Internal Note",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"note\": \"Customer called and confirmed delivery address.\"\n}"
+            },
+            "url": { "raw": "{{API}}/orders/{{ORDER_ID}}/notes", "host": ["{{API}}"], "path": ["orders","{{ORDER_ID}}","notes"] }
+          }
+        },
+        {
+          "name": "[Admin] Process Refund",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"refundId\": \"REFUND_ID_HERE\",\n  \"action\": \"approve\",\n  \"notes\": \"Approved after verification.\",\n  \"transactionId\": \"TXN123456\"\n}"
+            },
+            "url": { "raw": "{{API}}/orders/{{ORDER_ID}}/refund", "host": ["{{API}}"], "path": ["orders","{{ORDER_ID}}","refund"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "⭐ Reviews",
+      "item": [
+        { "name": "Get Product Reviews", "request": { "method": "GET", "url": { "raw": "{{API}}/reviews/product/{{PRODUCT_ID}}?page=1&limit=10", "host": ["{{API}}"], "path": ["reviews","product","{{PRODUCT_ID}}"] } } },
+        {
+          "name": "Submit Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "productId", "value": "{{PRODUCT_ID}}", "type": "text" },
+              { "key": "rating",    "value": "5",              "type": "text" },
+              { "key": "title",     "value": "Absolutely stunning!",  "type": "text" },
+              { "key": "body",      "value": "Quality is exceptional. Exceeded expectations.", "type": "text" },
+              { "key": "photos",    "type": "file", "src": [] }
+            ]},
+            "url": { "raw": "{{API}}/reviews", "host": ["{{API}}"], "path": ["reviews"] }
+          }
+        },
+        { "name": "Vote Helpful", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }], "url": { "raw": "{{API}}/reviews/{{REVIEW_ID}}/helpful", "host": ["{{API}}"], "path": ["reviews","{{REVIEW_ID}}","helpful"] } } },
+        {
+          "name": "Report Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"reason\": \"Spam or fake review.\"\n}" },
+            "url": { "raw": "{{API}}/reviews/{{REVIEW_ID}}/report", "host": ["{{API}}"], "path": ["reviews","{{REVIEW_ID}}","report"] }
+          }
+        },
+        { "name": "[Admin] Get All Reviews", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/reviews?status=pending&page=1", "host": ["{{API}}"], "path": ["reviews"], "query": [{ "key":"status","value":"pending" },{ "key":"isReported","value":"true","disabled":true }] } } },
+        { "name": "[Admin] Review Stats",   "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/reviews/stats", "host": ["{{API}}"], "path": ["reviews","stats"] } } },
+        {
+          "name": "[Admin] Approve Review",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"action\": \"approve\"\n}" },
+            "url": { "raw": "{{API}}/reviews/{{REVIEW_ID}}/moderate", "host": ["{{API}}"], "path": ["reviews","{{REVIEW_ID}}","moderate"] }
+          }
+        },
+        {
+          "name": "[Admin] Reject Review",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"action\": \"reject\"\n}" },
+            "url": { "raw": "{{API}}/reviews/{{REVIEW_ID}}/moderate", "host": ["{{API}}"], "path": ["reviews","{{REVIEW_ID}}","moderate"] }
+          }
+        },
+        {
+          "name": "[Admin] Reply to Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"message\": \"Thank you for your kind review! We are delighted to hear that.\"\n}" },
+            "url": { "raw": "{{API}}/reviews/{{REVIEW_ID}}/reply", "host": ["{{API}}"], "path": ["reviews","{{REVIEW_ID}}","reply"] }
           }
         }
       ]
     },
     {
-      "name": "Public",
+      "name": "🎟️ Coupons",
       "item": [
         {
-          "name": "Get All Products",
+          "name": "Validate Coupon",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"code\": \"WELCOME10\",\n  \"cartTotal\": 25000\n}" },
+            "url": { "raw": "{{API}}/coupons/validate", "host": ["{{API}}"], "path": ["coupons","validate"] }
+          }
+        },
+        { "name": "[Admin] List Coupons",    "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/coupons?page=1&isActive=true", "host": ["{{API}}"], "path": ["coupons"] } } },
+        { "name": "[Admin] Get Coupon",      "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/coupons/{{COUPON_ID}}", "host": ["{{API}}"], "path": ["coupons","{{COUPON_ID}}"] } } },
+        { "name": "[Admin] Coupon Analytics","request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/coupons/{{COUPON_ID}}/analytics", "host": ["{{API}}"], "path": ["coupons","{{COUPON_ID}}","analytics"] } } },
+        {
+          "name": "[Admin] Create Coupon (Percentage)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"code\": \"WELCOME10\",\n  \"description\": \"10% off for new customers\",\n  \"type\": \"percentage\",\n  \"value\": 10,\n  \"maxDiscount\": 2000,\n  \"minimumOrderAmount\": 5000,\n  \"usageLimit\": 100,\n  \"usageLimitPerUser\": 1,\n  \"expiresAt\": \"2026-12-31T23:59:59Z\",\n  \"forNewUsersOnly\": true\n}"
+            },
+            "url": { "raw": "{{API}}/coupons", "host": ["{{API}}"], "path": ["coupons"] }
+          }
+        },
+        {
+          "name": "[Admin] Create Coupon (Fixed)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"code\": \"FLAT500\",\n  \"description\": \"Flat ₹500 off\",\n  \"type\": \"fixed\",\n  \"value\": 500,\n  \"minimumOrderAmount\": 3000\n}"
+            },
+            "url": { "raw": "{{API}}/coupons", "host": ["{{API}}"], "path": ["coupons"] }
+          }
+        },
+        {
+          "name": "[Admin] Create Coupon (Free Shipping)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"code\": \"FREESHIP\",\n  \"description\": \"Free shipping on all orders\",\n  \"type\": \"free_shipping\",\n  \"value\": 0\n}"
+            },
+            "url": { "raw": "{{API}}/coupons", "host": ["{{API}}"], "path": ["coupons"] }
+          }
+        },
+        { "name": "[Admin] Delete Coupon", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/coupons/{{COUPON_ID}}", "host": ["{{API}}"], "path": ["coupons","{{COUPON_ID}}"] } } }
+      ]
+    },
+
+    {
+      "name": "🧵 Artisans",
+      "item": [
+        { "name": "Get All Artisans", "request": { "method": "GET", "url": { "raw": "{{API}}/artisans?isActive=true", "host": ["{{API}}"], "path": ["artisans"] } } },
+        { "name": "Get Artisan By Slug", "request": { "method": "GET", "url": { "raw": "{{API}}/artisans/master-hamid", "host": ["{{API}}"], "path": ["artisans","master-hamid"] } } },
+        {
+          "name": "[Admin] Create Artisan",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "name",       "value": "Master Hamid Ali", "type": "text" },
+              { "key": "bio",        "value": "45 years of hand-knotting experience in Kashmir.", "type": "text" },
+              { "key": "region",     "value": "Kashmir",          "type": "text" },
+              { "key": "experience", "value": "45",               "type": "text" },
+              { "key": "isFeatured", "value": "true",             "type": "text" },
+              { "key": "photo",      "type": "file", "src": [] }
+            ]},
+            "url": { "raw": "{{API}}/artisans", "host": ["{{API}}"], "path": ["artisans"] }
+          }
+        },
+        {
+          "name": "[Admin] Update Artisan",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [{ "key": "isFeatured", "value": "false", "type": "text" }]},
+            "url": { "raw": "{{API}}/artisans/{{ARTISAN_ID}}", "host": ["{{API}}"], "path": ["artisans","{{ARTISAN_ID}}"] }
+          }
+        },
+        { "name": "[Admin] Delete Artisan", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/artisans/{{ARTISAN_ID}}", "host": ["{{API}}"], "path": ["artisans","{{ARTISAN_ID}}"] } } }
+      ]
+    },
+    {
+      "name": "📝 Blogs",
+      "item": [
+        { "name": "Get Published Blogs", "request": { "method": "GET", "url": { "raw": "{{API}}/blogs?page=1&limit=10", "host": ["{{API}}"], "path": ["blogs"] } } },
+        { "name": "Get Blog By Slug",    "request": { "method": "GET", "url": { "raw": "{{API}}/blogs/the-art-of-persian-rugs", "host": ["{{API}}"], "path": ["blogs","the-art-of-persian-rugs"] } } },
+        { "name": "[Admin] All Blogs",   "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/blogs/admin/all?page=1&status=draft", "host": ["{{API}}"], "path": ["blogs","admin","all"] } } },
+        {
+          "name": "[Admin] Create Blog",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "title",         "value": "The Art of Persian Rug Making", "type": "text" },
+              { "key": "excerpt",       "value": "A deep dive into centuries of craft.", "type": "text" },
+              { "key": "content",       "value": "<p>Persian rug making dates back 2500 years...</p>", "type": "text" },
+              { "key": "categories",    "value": "Design", "type": "text" },
+              { "key": "tags",          "value": "persian,craft,heritage", "type": "text" },
+              { "key": "status",        "value": "published", "type": "text" },
+              { "key": "isFeatured",    "value": "true",      "type": "text" },
+              { "key": "featuredImage", "type": "file", "src": [] }
+            ]},
+            "url": { "raw": "{{API}}/blogs", "host": ["{{API}}"], "path": ["blogs"] }
+          }
+        },
+        {
+          "name": "[Admin] Update Blog",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [{ "key": "status", "value": "published", "type": "text" }]},
+            "url": { "raw": "{{API}}/blogs/{{BLOG_ID}}", "host": ["{{API}}"], "path": ["blogs","{{BLOG_ID}}"] }
+          }
+        },
+        { "name": "[Admin] Delete Blog", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/blogs/{{BLOG_ID}}", "host": ["{{API}}"], "path": ["blogs","{{BLOG_ID}}"] } } }
+      ]
+    },
+
+    {
+      "name": "🖼️ Media Library",
+      "item": [
+        { "name": "Get Media",       "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/media?page=1&type=image&folder=products", "host": ["{{API}}"], "path": ["media"], "query": [{ "key":"page","value":"1" },{ "key":"type","value":"image" },{ "key":"folder","value":"products" }] } } },
+        { "name": "Get Folders",     "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/media/folders", "host": ["{{API}}"], "path": ["media","folders"] } } },
+        { "name": "Storage Stats",   "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/media/stats", "host": ["{{API}}"], "path": ["media","stats"] } } },
+        {
+          "name": "Upload Files",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "folder", "value": "general", "type": "text" },
+              { "key": "files",  "type": "file", "src": [] },
+              { "key": "files",  "type": "file", "src": [] }
+            ]},
+            "url": { "raw": "{{API}}/media", "host": ["{{API}}"], "path": ["media"] }
+          }
+        },
+        {
+          "name": "Update Media Metadata",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"altText\": \"Persian carpet red gold\",\n  \"caption\": \"Hand-knotted Persian carpet\",\n  \"folder\": \"products\",\n  \"tags\": [\"carpet\", \"persian\", \"luxury\"]\n}" },
+            "url": { "raw": "{{API}}/media/{{MEDIA_ID}}", "host": ["{{API}}"], "path": ["media","{{MEDIA_ID}}"] }
+          }
+        },
+        { "name": "Delete File", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/media/{{MEDIA_ID}}", "host": ["{{API}}"], "path": ["media","{{MEDIA_ID}}"] } } },
+        {
+          "name": "Bulk Delete Files",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } }, "raw": "{\n  \"ids\": [\"ID1\", \"ID2\", \"ID3\"]\n}" },
+            "url": { "raw": "{{API}}/media/bulk", "host": ["{{API}}"], "path": ["media","bulk"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Inventory",
+      "item": [
+        { "name": "Inventory Overview", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/inventory?page=1&stockStatus=low_stock", "host": ["{{API}}"], "path": ["inventory"], "query": [{ "key":"page","value":"1" },{ "key":"stockStatus","value":"low_stock" }] } } },
+        { "name": "Inventory Stats",    "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/inventory/stats", "host": ["{{API}}"], "path": ["inventory","stats"] } } },
+        { "name": "Inventory Movements","request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/inventory/movements?page=1&type=sale", "host": ["{{API}}"], "path": ["inventory","movements"], "query": [{ "key":"page","value":"1" },{ "key":"type","value":"sale" }] } } },
+        {
+          "name": "Adjust Stock",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"productId\": \"{{PRODUCT_ID}}\",\n  \"quantity\": 10,\n  \"type\": \"purchase\",\n  \"notes\": \"New stock received from supplier.\",\n  \"warehouse\": \"Mumbai Warehouse\"\n}"
+            },
+            "description": "type: purchase | adjustment | transfer | damage | return",
+            "url": { "raw": "{{API}}/inventory/adjust", "host": ["{{API}}"], "path": ["inventory","adjust"] }
+          }
+        },
+        {
+          "name": "Bulk Stock Update",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"updates\": [\n    { \"productId\": \"ID1\", \"stock\": 25, \"notes\": \"Restock\" },\n    { \"productId\": \"ID2\", \"stock\": 10, \"notes\": \"Restock\" }\n  ]\n}"
+            },
+            "url": { "raw": "{{API}}/inventory/bulk", "host": ["{{API}}"], "path": ["inventory","bulk"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🌐 CMS Pages",
+      "item": [
+        { "name": "Get Page (Public)", "request": { "method": "GET", "url": { "raw": "{{API}}/cms/homepage", "host": ["{{API}}"], "path": ["cms","homepage"] }, "description": "pageKey: homepage | about-us | contact | faq | privacy-policy | terms | shipping-policy" } },
+        { "name": "[Admin] List All Pages", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }], "url": { "raw": "{{API}}/cms/", "host": ["{{API}}"], "path": ["cms"] } } },
+        {
+          "name": "[Admin] Upsert Homepage",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"title\": \"Homepage\",\n  \"sections\": [\n    { \"sectionKey\": \"hero\", \"title\": \"Timeless Luxury\", \"content\": \"Discover handcrafted Persian carpets.\", \"image\": \"https://example.com/hero.jpg\" },\n    { \"sectionKey\": \"featured_text\", \"title\": \"Our Craft\", \"content\": \"Each carpet is a story woven in wool and silk.\" }\n  ],\n  \"metaTitle\": \"Artistic Carpets — Luxury Handcrafted Rugs\",\n  \"metaDescription\": \"Shop premium Persian and handmade carpets.\"\n}"
+            },
+            "url": { "raw": "{{API}}/cms/homepage", "host": ["{{API}}"], "path": ["cms","homepage"] }
+          }
+        },
+        {
+          "name": "[Admin] Upsert About Us",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"title\": \"About Us\",\n  \"content\": \"<p>Founded in 1985, Artistic Carpets brings the finest handcrafted rugs...</p>\",\n  \"metaTitle\": \"About Artistic Carpets\"\n}"
+            },
+            "url": { "raw": "{{API}}/cms/about-us", "host": ["{{API}}"], "path": ["cms","about-us"] }
+          }
+        },
+        {
+          "name": "[Admin] Upsert FAQ",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"title\": \"FAQ\",\n  \"sections\": [\n    { \"sectionKey\": \"q1\", \"title\": \"How do I care for my carpet?\", \"content\": \"Vacuum regularly and dry clean professionally.\" },\n    { \"sectionKey\": \"q2\", \"title\": \"What is your return policy?\", \"content\": \"We accept returns within 7 days of delivery.\" }\n  ]\n}"
+            },
+            "url": { "raw": "{{API}}/cms/faq", "host": ["{{API}}"], "path": ["cms","faq"] }
+          }
+        },
+        {
+          "name": "[Admin] Upsert Shipping Policy",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"title\": \"Shipping Policy\",\n  \"content\": \"<p>We ship across India within 5-7 business days. Free shipping on orders above ₹5000.</p>\"\n}"
+            },
+            "url": { "raw": "{{API}}/cms/shipping-policy", "host": ["{{API}}"], "path": ["cms","shipping-policy"] }
+          }
+        },
+        {
+          "name": "[Admin] Upsert Privacy Policy",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"title\": \"Privacy Policy\",\n  \"content\": \"<p>Your privacy is important to us...</p>\"\n}"
+            },
+            "url": { "raw": "{{API}}/cms/privacy-policy", "host": ["{{API}}"], "path": ["cms","privacy-policy"] }
+          }
+        },
+        {
+          "name": "[Admin] Upsert Terms",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "body": { "mode": "raw", "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"title\": \"Terms & Conditions\",\n  \"content\": \"<p>By using our website, you agree to the following terms...</p>\"\n}"
+            },
+            "url": { "raw": "{{API}}/cms/terms", "host": ["{{API}}"], "path": ["cms","terms"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📈 Analytics",
+      "item": [
+        {
+          "name": "Dashboard Stats",
           "request": {
             "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/analytics/dashboard", "host": ["{{API}}"], "path": ["analytics","dashboard"] },
+            "description": "Returns today revenue, monthly revenue, order counts, customer counts, inventory value, AOV, refund totals."
+          }
+        },
+        {
+          "name": "Revenue Chart",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
             "url": {
-              "raw": "{{BASE_URL}}/api/products?page=1&limit=12&sort=newest",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "products"],
+              "raw": "{{API}}/analytics/revenue-chart?period=monthly&months=12",
+              "host": ["{{API}}"], "path": ["analytics","revenue-chart"],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "12" },
-                { "key": "sort", "value": "newest", "description": "newest|oldest|price_low|price_high|rating|bestselling" },
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "category", "value": "", "disabled": true },
-                { "key": "material", "value": "", "disabled": true },
-                { "key": "color", "value": "", "disabled": true },
-                { "key": "size", "value": "", "disabled": true },
-                { "key": "shape", "value": "", "disabled": true },
-                { "key": "style", "value": "", "disabled": true },
-                { "key": "collection", "value": "", "disabled": true },
-                { "key": "minPrice", "value": "", "disabled": true },
-                { "key": "maxPrice", "value": "", "disabled": true },
-                { "key": "inStock", "value": "true", "disabled": true }
+                { "key": "period", "value": "monthly", "description": "daily | weekly | monthly | quarterly" },
+                { "key": "months", "value": "12" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Top Products",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/analytics/top-products?limit=10", "host": ["{{API}}"], "path": ["analytics","top-products"], "query": [{ "key":"limit","value":"10" }] }
+          }
+        },
+        {
+          "name": "Top Categories",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/analytics/top-categories", "host": ["{{API}}"], "path": ["analytics","top-categories"] }
+          }
+        },
+        {
+          "name": "Sales By Country",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/analytics/sales-by-country", "host": ["{{API}}"], "path": ["analytics","sales-by-country"] }
+          }
+        },
+        {
+          "name": "Customer Retention",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/analytics/customer-retention", "host": ["{{API}}"], "path": ["analytics","customer-retention"] }
+          }
+        },
+        {
+          "name": "Conversion Funnel",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/analytics/conversion-funnel", "host": ["{{API}}"], "path": ["analytics","conversion-funnel"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "Get Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": {
+              "raw": "{{API}}/notifications?page=1&isRead=false",
+              "host": ["{{API}}"], "path": ["notifications"],
+              "query": [{ "key":"page","value":"1" }, { "key":"isRead","value":"false" }]
+            }
+          }
+        },
+        {
+          "name": "Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/notifications/unread-count", "host": ["{{API}}"], "path": ["notifications","unread-count"] }
+          }
+        },
+        {
+          "name": "Mark All As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/notifications/read-all", "host": ["{{API}}"], "path": ["notifications","read-all"] }
+          }
+        },
+        {
+          "name": "Mark One As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/notifications/NOTIFICATION_ID/read", "host": ["{{API}}"], "path": ["notifications","NOTIFICATION_ID","read"] }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": { "raw": "{{API}}/notifications/NOTIFICATION_ID", "host": ["{{API}}"], "path": ["notifications","NOTIFICATION_ID"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🗂️ Audit Logs",
+      "item": [
+        {
+          "name": "Get Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": {
+              "raw": "{{API}}/audit-logs?page=1&limit=50",
+              "host": ["{{API}}"], "path": ["audit-logs"],
+              "query": [
+                { "key": "page",      "value": "1" },
+                { "key": "limit",     "value": "50" },
+                { "key": "module",    "value": "",     "disabled": true, "description": "Product | Order | User | Auth | Coupon | Inventory" },
+                { "key": "action",    "value": "",     "disabled": true },
+                { "key": "userId",    "value": "",     "disabled": true },
+                { "key": "startDate", "value": "",     "disabled": true },
+                { "key": "endDate",   "value": "",     "disabled": true }
               ]
             },
-            "description": "Paginated, filtered, sorted product list."
+            "description": "Super Admin only. Full audit trail of all actions in the system."
           }
-        },
+        }
+      ]
+    },
+    {
+      "name": "❤️ Health",
+      "item": [
         {
-          "name": "Get Product By Slug",
+          "name": "Health Check",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "{{BASE_URL}}/api/products/{{PRODUCT_SLUG}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "products", "{{PRODUCT_SLUG}}"]
-            }
-          }
-        },
-        {
-          "name": "Featured Products",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{BASE_URL}}/api/products/featured?limit=12",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "products", "featured"],
-              "query": [{ "key": "limit", "value": "12" }]
-            }
-          }
-        },
-        {
-          "name": "Trending Products",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{BASE_URL}}/api/products/trending?limit=12",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "products", "trending"],
-              "query": [{ "key": "limit", "value": "12" }]
-            }
-          }
-        },
-        {
-          "name": "Best Sellers",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{BASE_URL}}/api/products/bestseller?limit=12",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "products", "bestseller"],
-              "query": [{ "key": "limit", "value": "12" }]
-            }
-          }
-        },
-        {
-          "name": "New Arrivals",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{BASE_URL}}/api/products/new-arrivals?limit=12",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "products", "new-arrivals"],
-              "query": [{ "key": "limit", "value": "12" }]
-            }
-          }
-        },
-        {
-          "name": "Related Products",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{BASE_URL}}/api/products/related/{{PRODUCT_ID}}?limit=8",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "products", "related", "{{PRODUCT_ID}}"],
-              "query": [{ "key": "limit", "value": "8" }]
-            }
+            "url": { "raw": "{{BASE_URL}}/health", "host": ["{{BASE_URL}}"], "path": ["health"] },
+            "description": "Returns server status and environment. No auth required."
           }
         }
       ]
