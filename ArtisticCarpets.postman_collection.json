@@ -1,0 +1,218 @@
+{
+  "info": {
+    "name": "Artistic Carpets — Product API",
+    "description": "Complete Postman collection for the Carpet E-commerce Product Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "BASE_URL", "value": "http://localhost:5000" },
+    { "key": "ADMIN_TOKEN", "value": "<paste_your_admin_jwt_here>" },
+    { "key": "PRODUCT_ID", "value": "<paste_product_id_here>" },
+    { "key": "PRODUCT_SLUG", "value": "<paste_product_slug_here>" }
+  ],
+  "item": [
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ADMIN_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Persian Hand-Knotted Carpet", "type": "text" },
+                { "key": "shortDescription", "value": "Luxurious hand-knotted Persian carpet.", "type": "text" },
+                { "key": "description", "value": "A beautiful hand-knotted carpet crafted by artisans in Iran with premium wool.", "type": "text" },
+                { "key": "category", "value": "Persian Carpets", "type": "text" },
+                { "key": "subCategory", "value": "Hand-Knotted", "type": "text" },
+                { "key": "collection", "value": "Royal Heritage", "type": "text" },
+                { "key": "price", "value": "25000", "type": "text" },
+                { "key": "discountPrice", "value": "21000", "type": "text" },
+                { "key": "stock", "value": "15", "type": "text" },
+                { "key": "material", "value": "Wool", "type": "text" },
+                { "key": "size", "value": "6x9 ft", "type": "text" },
+                { "key": "shape", "value": "Rectangle", "type": "text" },
+                { "key": "color", "value": "Red & Gold", "type": "text" },
+                { "key": "style", "value": "Traditional", "type": "text" },
+                { "key": "room", "value": "Living Room", "type": "text" },
+                { "key": "origin", "value": "Iran", "type": "text" },
+                { "key": "weavingType", "value": "Hand-Knotted", "type": "text" },
+                { "key": "pileHeight", "value": "10mm", "type": "text" },
+                { "key": "weight", "value": "4.5 kg", "type": "text" },
+                { "key": "isFeatured", "value": "true", "type": "text" },
+                { "key": "isTrending", "value": "false", "type": "text" },
+                { "key": "isBestSeller", "value": "false", "type": "text" },
+                { "key": "isNewArrival", "value": "true", "type": "text" },
+                { "key": "status", "value": "active", "type": "text" },
+                { "key": "metaTitle", "value": "Buy Persian Hand-Knotted Carpet | Artistic Carpets", "type": "text" },
+                { "key": "metaDescription", "value": "Shop premium Persian hand-knotted carpets for your living room.", "type": "text" },
+                { "key": "metaKeywords", "value": "persian carpet, hand knotted, wool carpet", "type": "text" },
+                { "key": "thumbnail", "src": "/path/to/thumbnail.jpg", "type": "file" },
+                { "key": "images", "src": "/path/to/image1.jpg", "type": "file" },
+                { "key": "images", "src": "/path/to/image2.jpg", "type": "file" }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/admin/products",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "admin", "products"]
+            },
+            "description": "Create a new product. Requires Admin JWT token."
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Updated Persian Carpet", "type": "text" },
+                { "key": "price", "value": "22000", "type": "text" },
+                { "key": "discountPrice", "value": "19000", "type": "text" },
+                { "key": "stock", "value": "20", "type": "text" },
+                { "key": "isFeatured", "value": "true", "type": "text" },
+                { "key": "thumbnail", "src": "/path/to/new-thumbnail.jpg", "type": "file" }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/admin/products/{{PRODUCT_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "admin", "products", "{{PRODUCT_ID}}"]
+            },
+            "description": "Update product fields. Omit file fields to keep existing images."
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/admin/products/{{PRODUCT_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "admin", "products", "{{PRODUCT_ID}}"]
+            },
+            "description": "Delete product + all local image files."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/products?page=1&limit=12&sort=newest",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "12" },
+                { "key": "sort", "value": "newest", "description": "newest|oldest|price_low|price_high|rating|bestselling" },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "category", "value": "", "disabled": true },
+                { "key": "material", "value": "", "disabled": true },
+                { "key": "color", "value": "", "disabled": true },
+                { "key": "size", "value": "", "disabled": true },
+                { "key": "shape", "value": "", "disabled": true },
+                { "key": "style", "value": "", "disabled": true },
+                { "key": "collection", "value": "", "disabled": true },
+                { "key": "minPrice", "value": "", "disabled": true },
+                { "key": "maxPrice", "value": "", "disabled": true },
+                { "key": "inStock", "value": "true", "disabled": true }
+              ]
+            },
+            "description": "Paginated, filtered, sorted product list."
+          }
+        },
+        {
+          "name": "Get Product By Slug",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/products/{{PRODUCT_SLUG}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "products", "{{PRODUCT_SLUG}}"]
+            }
+          }
+        },
+        {
+          "name": "Featured Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/products/featured?limit=12",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "products", "featured"],
+              "query": [{ "key": "limit", "value": "12" }]
+            }
+          }
+        },
+        {
+          "name": "Trending Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/products/trending?limit=12",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "products", "trending"],
+              "query": [{ "key": "limit", "value": "12" }]
+            }
+          }
+        },
+        {
+          "name": "Best Sellers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/products/bestseller?limit=12",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "products", "bestseller"],
+              "query": [{ "key": "limit", "value": "12" }]
+            }
+          }
+        },
+        {
+          "name": "New Arrivals",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/products/new-arrivals?limit=12",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "products", "new-arrivals"],
+              "query": [{ "key": "limit", "value": "12" }]
+            }
+          }
+        },
+        {
+          "name": "Related Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/products/related/{{PRODUCT_ID}}?limit=8",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "products", "related", "{{PRODUCT_ID}}"],
+              "query": [{ "key": "limit", "value": "8" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
