@@ -7,6 +7,7 @@
   "variable": [
     { "key": "BASE_URL", "value": "http://localhost:5000" },
     { "key": "ADMIN_TOKEN", "value": "<paste_your_admin_jwt_here>" },
+    { "key": "USER_TOKEN", "value": "<paste_your_user_jwt_here>" },
     { "key": "PRODUCT_ID", "value": "<paste_product_id_here>" },
     { "key": "PRODUCT_SLUG", "value": "<paste_product_slug_here>" }
   ],
@@ -15,145 +16,256 @@
       "name": "Auth",
       "item": [
         {
-          "name": "Register Admin",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Super Admin\",\n  \"email\": \"admin@artisticcarpets.com\",\n  \"password\": \"Admin@123\"\n}",
-              "options": { "raw": { "language": "json" } }
+          "name": "Admin Auth",
+          "item": [
+            {
+              "name": "Register Admin",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Super Admin\",\n  \"email\": \"admin@artisticcarpets.com\",\n  \"phoneNumber\": \"+919876543210\",\n  \"password\": \"Admin@123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/admin/register",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "admin", "register"]
+                },
+                "description": "Register a new admin. Returns JWT on success."
+              }
             },
-            "url": {
-              "raw": "{{BASE_URL}}/api/auth/register",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "auth", "register"]
+            {
+              "name": "Login Admin",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"identifier\": \"admin@artisticcarpets.com\",\n  \"password\": \"Admin@123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/admin/login",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "admin", "login"]
+                },
+                "description": "Login with email or phone number. Copy token to ADMIN_TOKEN variable."
+              }
             },
-            "description": "Register a new admin account. Returns a JWT token on success."
-          }
+            {
+              "name": "Logout Admin",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+                "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/admin/logout",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "admin", "logout"]
+                },
+                "description": "Logout the authenticated admin."
+              }
+            },
+            {
+              "name": "Get Admin Profile (Me)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/me",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "me"]
+                },
+                "description": "Returns the currently authenticated admin's profile."
+              }
+            }
+          ]
         },
         {
-          "name": "Login Admin",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"identifier\": \"admin@artisticcarpets.com\",\n  \"password\": \"Admin@123\"\n}",
-              "options": { "raw": { "language": "json" } }
+          "name": "User Auth",
+          "item": [
+            {
+              "name": "Register User",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phoneNumber\": \"+919876543211\",\n  \"password\": \"User@123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/user/register",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "user", "register"]
+                },
+                "description": "Register a new user. Returns JWT on success."
+              }
             },
-            "url": {
-              "raw": "{{BASE_URL}}/api/auth/login",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "auth", "login"]
+            {
+              "name": "Login User",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"identifier\": \"john@example.com\",\n  \"password\": \"User@123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/user/login",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "user", "login"]
+                },
+                "description": "Login with email or phone number. Copy token to USER_TOKEN variable."
+              }
             },
-            "description": "Login as admin using either email or phone number. Pass `identifier` (email or phone) + `password`. Copy the returned token into the ADMIN_TOKEN collection variable."
-          }
+            {
+              "name": "Logout User",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+                "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/user/logout",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "user", "logout"]
+                },
+                "description": "Logout the authenticated user."
+              }
+            },
+            {
+              "name": "Get User Profile (Me)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{USER_TOKEN}}" }],
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/me",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "me"]
+                },
+                "description": "Returns the currently authenticated user's profile."
+              }
+            }
+          ]
         },
         {
-          "name": "Logout Admin",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{}",
-              "options": { "raw": { "language": "json" } }
+          "name": "Shared Auth",
+          "item": [
+            {
+              "name": "Refresh Token",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"{{ADMIN_TOKEN}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/refresh-token",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "refresh-token"]
+                },
+                "description": "Issue a fresh JWT from an existing (even expired) token. Works for both admin and user tokens."
+              }
             },
-            "url": {
-              "raw": "{{BASE_URL}}/api/auth/logout",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "auth", "logout"]
+            {
+              "name": "Change Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"oldPassword\": \"Admin@123\",\n  \"newPassword\": \"NewAdmin@456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/change-password",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "change-password"]
+                },
+                "description": "Change password for the authenticated user or admin. Requires valid JWT."
+              }
             },
-            "description": "Logout the currently authenticated admin."
-          }
-        },
-        {
-          "name": "Refresh Token",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"token\": \"{{ADMIN_TOKEN}}\"\n}",
-              "options": { "raw": { "language": "json" } }
+            {
+              "name": "Forgot Password",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@artisticcarpets.com\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/forgot-password",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "forgot-password"]
+                },
+                "description": "Initiate password reset. Returns a resetToken (placeholder — implement email in production)."
+              }
             },
-            "url": {
-              "raw": "{{BASE_URL}}/api/auth/refresh-token",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "auth", "refresh-token"]
+            {
+              "name": "Reset Password",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@artisticcarpets.com\",\n  \"resetToken\": \"123456\",\n  \"newPassword\": \"ResetAdmin@789\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/reset-password",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "reset-password"]
+                },
+                "description": "Reset password using the token from Forgot Password."
+              }
             },
-            "description": "Issue a fresh JWT using an existing (even expired) token. Returns a new token with a 7-day expiry."
-          }
-        },
-        {
-          "name": "Change Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"oldPassword\": \"Admin@123\",\n  \"newPassword\": \"NewAdmin@456\"\n}",
-              "options": { "raw": { "language": "json" } }
+            {
+              "name": "Send OTP",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phoneNumber\": \"+919876543210\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/send-otp",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "send-otp"]
+                },
+                "description": "Send a one-time password (OTP) to the given phone number for verification or login."
+              }
             },
-            "url": {
-              "raw": "{{BASE_URL}}/api/auth/change-password",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "auth", "change-password"]
-            },
-            "description": "Change password for the currently authenticated user (admin or regular user). Requires a valid JWT."
-          }
-        },
-        {
-          "name": "Forgot Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@artisticcarpets.com\"\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{BASE_URL}}/api/auth/forgot-password",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "auth", "forgot-password"]
-            },
-            "description": "Initiate a password reset. Returns a resetToken in the response (currently a placeholder — implement email delivery in production)."
-          }
-        },
-        {
-          "name": "Reset Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@artisticcarpets.com\",\n  \"resetToken\": \"123456\",\n  \"newPassword\": \"ResetAdmin@789\"\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{BASE_URL}}/api/auth/reset-password",
-              "host": ["{{BASE_URL}}"],
-              "path": ["api", "auth", "reset-password"]
-            },
-            "description": "Reset the account password using the token received from the Forgot Password endpoint."
-          }
+            {
+              "name": "Verify OTP",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"phoneNumber\": \"+919876543210\",\n  \"otp\": \"123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/api/auth/verify-otp",
+                  "host": ["{{BASE_URL}}"],
+                  "path": ["api", "auth", "verify-otp"]
+                },
+                "description": "Verify the OTP sent to the phone number. Returns a JWT on success."
+              }
+            }
+          ]
         }
       ]
     },
