@@ -1,12 +1,12 @@
 import express from "express";
 
 const app = express();
-const PORT = 3000;
+const PORT = 5000;
 
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Server is running on port 3000");
+  res.send("Server is running on port 5000");
 });
 
 app.listen(PORT, () => {
