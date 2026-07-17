@@ -171,6 +171,7 @@ router.post(
   bulkUpdateProducts
 );
 
+
 /**
  * DELETE /api/admin/products/:id/images
  * Delete a specific image from a product (Admin only)
