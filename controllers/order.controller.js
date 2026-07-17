@@ -31,7 +31,7 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   for (const item of items) {
     const product = await Product.findById(item.productId);
-    if (!product || !product.isActive) {
+    if (!product || product.status !== "active") {
       return errorResponse(res, `Product not available: ${item.productId}`, 400);
     }
     if (product.stock < item.quantity) {
@@ -44,8 +44,8 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     orderItems.push({
       product: product._id,
-      name: product.name,
-      image: product.mainImage,
+      name: product.title,
+      image: product.thumbnail?.path || product.images?.[0]?.path || null,
       sku: product.sku,
       size: item.size,
       material: item.material,

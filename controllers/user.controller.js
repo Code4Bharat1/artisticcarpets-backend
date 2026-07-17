@@ -37,6 +37,8 @@ export const updateProfile = asyncHandler(async (req, res) => {
     { new: true, runValidators: true }
   );
 
+  if (!user) return errorResponse(res, "User not found.", 404);
+
   return successResponse(res, { user: user.toPublic() }, "Profile updated.");
 });
 
@@ -111,6 +113,8 @@ export const toggleWishlist = asyncHandler(async (req, res) => {
 export const getWishlist = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id)
     .populate("wishlist", "name mainImage price discountPrice slug rating reviewCount isActive");
+
+  if (!user) return errorResponse(res, "User not found.", 404);
 
   return successResponse(res, { wishlist: user.wishlist }, "Wishlist fetched.");
 });

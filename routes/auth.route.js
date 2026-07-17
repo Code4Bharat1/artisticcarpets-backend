@@ -1,76 +1,125 @@
 import { Router } from "express";
-import { body, query } from "express-validator";
+import { body } from "express-validator";
 import {
-  register,
-  login,
-  logout,
-  verifyEmail,
+  registerAdmin,
+  loginAdmin,
+  logoutAdmin,
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshToken,
+  changePassword,
   forgotPassword,
   resetPassword,
-  refreshToken,
-  getMe,
-  changePassword,
 } from "../controllers/auth.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
 
 const router = Router();
 
-// Public
+// ─────────────────────────────────────────────
+// Admin Auth
+// ─────────────────────────────────────────────
+
+// POST /api/auth/admin/register
 router.post(
-  "/register",
+  "/admin/register",
   [
-    body("firstName").trim().notEmpty().withMessage("First name is required."),
-    body("lastName").trim().notEmpty().withMessage("Last name is required."),
+    body("name").trim().notEmpty().withMessage("Name is required."),
     body("email").isEmail().normalizeEmail().withMessage("Valid email is required."),
+    body("phoneNumber").trim().notEmpty().withMessage("Phone number is required."),
     body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters."),
   ],
   validate,
-  register
+  registerAdmin
 );
 
+// POST /api/auth/admin/login  (email or phone + password)
 router.post(
-  "/login",
+  "/admin/login",
   [
-    body("email").isEmail().normalizeEmail().withMessage("Valid email is required."),
+    body("identifier").trim().notEmpty().withMessage("Email or phone number is required."),
     body("password").notEmpty().withMessage("Password is required."),
   ],
   validate,
-  login
+  loginAdmin
 );
 
-router.get("/verify-email", verifyEmail);
+// POST /api/auth/admin/logout  (protected)
+router.post("/admin/logout", protect, logoutAdmin);
 
+// ─────────────────────────────────────────────
+// User Auth
+// ─────────────────────────────────────────────
+
+// POST /api/auth/user/register
 router.post(
-  "/forgot-password",
-  [body("email").isEmail().normalizeEmail()],
+  "/user/register",
+  [
+    body("name").trim().notEmpty().withMessage("Name is required."),
+    body("email").isEmail().normalizeEmail().withMessage("Valid email is required."),
+    body("phoneNumber").trim().notEmpty().withMessage("Phone number is required."),
+    body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters."),
+  ],
   validate,
-  forgotPassword
+  registerUser
 );
 
+// POST /api/auth/user/login  (email or phone + password)
 router.post(
-  "/reset-password",
-  [body("password").isLength({ min: 6 })],
+  "/user/login",
+  [
+    body("identifier").trim().notEmpty().withMessage("Email or phone number is required."),
+    body("password").notEmpty().withMessage("Password is required."),
+  ],
   validate,
-  resetPassword
+  loginUser
 );
 
-router.post("/refresh-token", refreshToken);
+// POST /api/auth/user/logout  (protected)
+router.post("/user/logout", protect, logoutUser);
 
-// Protected
-router.get("/me", protect, getMe);
+// ─────────────────────────────────────────────
+// Shared Auth
+// ─────────────────────────────────────────────
 
+// POST /api/auth/refresh-token
+router.post(
+  "/refresh-token",
+  [body("token").notEmpty().withMessage("Token is required.")],
+  validate,
+  refreshToken
+);
+
+// POST /api/auth/change-password  (protected)
 router.post(
   "/change-password",
   protect,
   [
-    body("currentPassword").notEmpty(),
-    body("newPassword").isLength({ min: 6 }),
+    body("oldPassword").notEmpty().withMessage("Old password is required."),
+    body("newPassword").isLength({ min: 6 }).withMessage("New password must be at least 6 characters."),
   ],
   validate,
   changePassword
 );
 
-router.post("/logout", protect, logout);
+// POST /api/auth/forgot-password
+router.post(
+  "/forgot-password",
+  [body("email").isEmail().normalizeEmail().withMessage("Valid email is required.")],
+  validate,
+  forgotPassword
+);
+
+// POST /api/auth/reset-password
+router.post(
+  "/reset-password",
+  [
+    body("email").isEmail().normalizeEmail().withMessage("Valid email is required."),
+    body("newPassword").isLength({ min: 6 }).withMessage("New password must be at least 6 characters."),
+  ],
+  validate,
+  resetPassword
+);
 
 export default router;

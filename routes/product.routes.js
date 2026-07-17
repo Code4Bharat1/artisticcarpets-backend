@@ -19,6 +19,11 @@ import {
   getBestSellerProducts,
   getNewArrivalProducts,
   getRelatedProducts,
+  getProductStats,
+  archiveProduct,
+  restoreProduct,
+  bulkUpdateProducts,
+  deleteProductImage,
 } from "../controllers/product.controller.js";
 
 const router = Router();
@@ -79,12 +84,18 @@ const mongoIdParam = (paramName) =>
 // ─────────────────────────────────────────────────────────────
 
 /**
+ * GET /api/products/stats
+ * Get overall product statistics (Admin only)
+ */
+router.get("/products/stats", protect, isAdmin, getProductStats);
+
+/**
  * POST /api/admin/products
  * Create a new product (Admin only)
  * Body: multipart/form-data
  */
 router.post(
-  "/admin/products",
+  "/products",
   protect,
   isAdmin,
   uploadProductImages,
@@ -99,7 +110,7 @@ router.post(
  * Body: multipart/form-data
  */
 router.put(
-  "/admin/products/:id",
+  "/products/:id",
   protect,
   isAdmin,
   uploadProductImages,
@@ -113,11 +124,64 @@ router.put(
  * Delete a product and its files (Admin only)
  */
 router.delete(
-  "/admin/products/:id",
+  "/products/:id",
   protect,
   isAdmin,
   [mongoIdParam("id")],
   deleteProduct
+);
+
+// ─────────────────────────────────────────────────────────────
+//  ADMIN ROUTES  (protected + admin-only + file upload)
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * PATCH /api/admin/products/:id/archive
+ * Archive a product (Admin only)
+ */
+router.patch(
+  "/products/:id/archive",
+  protect,
+  isAdmin,
+  [mongoIdParam("id")],
+  archiveProduct
+);
+
+/**
+ * PATCH /api/admin/products/:id/restore
+ * Restore an archived product (Admin only)
+ */
+router.patch(
+  "/products/:id/restore",
+  protect,
+  isAdmin,
+  [mongoIdParam("id")],
+  restoreProduct
+);
+
+/**
+ * POST /api/admin/products/bulk
+ * Bulk update/create products (Admin only)
+ * Body: { products: [{ title, price, category, ... }] }
+ */
+router.post(
+  "/products/bulk",
+  protect,
+  isAdmin,
+  bulkUpdateProducts
+);
+
+/**
+ * DELETE /api/admin/products/:id/images
+ * Delete a specific image from a product (Admin only)
+ * Body: { filename: "string" }
+ */
+router.delete(
+  "/products/:id/images",
+  protect,
+  isAdmin,
+  [mongoIdParam("id")],
+  deleteProductImage
 );
 
 // ─────────────────────────────────────────────────────────────

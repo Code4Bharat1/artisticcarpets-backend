@@ -321,6 +321,143 @@ export const updateProduct = async (req, res) => {
 };
 
 // ════════════════════════════════════════════════════════════════
+//  ADMIN: Archive Product
+//  PATCH /api/admin/products/:id/archive
+// ════════════════════════════════════════════════════════════════
+export const archiveProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return sendError(res, 404, "Product not found.");
+    }
+
+    product.status = "archived";
+    await product.save();
+
+    return sendSuccess(res, 200, "Product archived successfully.", {
+      product,
+    });
+  } catch (error) {
+    return sendError(res, 500, "Failed to archive product.", error.message);
+  }
+};
+
+// ════════════════════════════════════════════════════════════════
+//  ADMIN: Restore Product
+//  PATCH /api/admin/products/:id/restore
+// ════════════════════════════════════════════════════════════════
+export const restoreProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return sendError(res, 404, "Product not found.");
+    }
+
+    product.status = "active";
+    await product.save();
+
+    return sendSuccess(res, 200, "Product restored successfully.", {
+      product,
+    });
+  } catch (error) {
+    return sendError(res, 500, "Failed to restore product.", error.message);
+  }
+};
+
+// ════════════════════════════════════════════════════════════════
+//  ADMIN: Bulk Update/Create Products
+//  POST /api/admin/products/bulk
+// ════════════════════════════════════════════════════════════════
+export const bulkUpdateProducts = async (req, res) => {
+  try {
+    const { products } = req.body;
+
+    if (!Array.isArray(products) || products.length === 0) {
+      return sendError(res, 400, "Please provide an array of products.");
+    }
+
+    const bulkOps = products.map((prod) => {
+      // If product lacks a title or price but is being created, it will fail schema validation later,
+      // but for bulkWrite upsert based on SKU, we do our best.
+      const sku = prod.sku || generateSKU();
+      
+      // Auto-generate slug if not present but title is
+      if (!prod.slug && prod.title) {
+        prod.slug = slugify(prod.title, { lower: true, strict: true }) + '-' + Date.now().toString().slice(-4);
+      }
+
+      // Calculate discount percentage if both prices are provided
+      if (prod.price && prod.discountPrice) {
+        prod.discountPercentage = calcDiscountPercentage(prod.price, prod.discountPrice);
+      }
+
+      return {
+        updateOne: {
+          filter: { sku: sku },
+          update: { $set: { ...prod, sku } },
+          upsert: true,
+        },
+      };
+    });
+
+    const result = await Product.bulkWrite(bulkOps);
+
+    return sendSuccess(res, 200, "Bulk operation completed successfully.", {
+      matchedCount: result.matchedCount,
+      modifiedCount: result.modifiedCount,
+      upsertedCount: result.upsertedCount,
+    });
+  } catch (error) {
+    return sendError(res, 500, "Failed to process bulk operation.", error.message);
+  }
+};
+
+// ════════════════════════════════════════════════════════════════
+//  ADMIN: Delete Product Image
+//  DELETE /api/admin/products/:id/images
+// ════════════════════════════════════════════════════════════════
+export const deleteProductImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { filename } = req.body;
+
+    if (!filename) {
+      return sendError(res, 400, "Image filename is required in the request body.");
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return sendError(res, 404, "Product not found.");
+    }
+
+    // Find the image
+    const imageIndex = product.images.findIndex((img) => img.filename === filename);
+    if (imageIndex === -1) {
+      return sendError(res, 404, "Image not found in this product.");
+    }
+
+    const imagePath = product.images[imageIndex].path;
+
+    // Remove from array
+    product.images.splice(imageIndex, 1);
+    await product.save();
+
+    // Delete from filesystem/cloud
+    await deleteFile(imagePath);
+
+    return sendSuccess(res, 200, "Product image deleted successfully.", {
+      images: product.images,
+    });
+  } catch (error) {
+    return sendError(res, 500, "Failed to delete product image.", error.message);
+  }
+};
+
+// ════════════════════════════════════════════════════════════════
 //  ADMIN: Delete Product
 //  DELETE /api/admin/products/:id
 // ════════════════════════════════════════════════════════════════
@@ -455,15 +592,21 @@ export const getAllProducts = async (req, res) => {
 // ════════════════════════════════════════════════════════════════
 export const getProductBySlug = async (req, res) => {
   try {
-    const product = await Product.findOne({
-      slug: req.params.slug,
-      status: "active",
-    })
+    const { slug } = req.params;
+    let query = { status: "active" };
+
+    if (mongoose.Types.ObjectId.isValid(slug)) {
+      query._id = slug;
+    } else {
+      query.slug = slug;
+    }
+
+    const product = await Product.findOne(query)
       .select("-__v")
       .lean();
 
     if (!product) {
-      return sendError(res, 404, "Product not found.");
+      return sendError(res, 404, `Product not found. We searched for an active product with the identifier: '${slug}'`);
     }
 
     return sendSuccess(res, 200, "Product fetched successfully.", product);
@@ -591,3 +734,28 @@ export const getRelatedProducts = async (req, res) => {
     return sendError(res, 500, "Internal server error.");
   }
 };
+
+// ════════════════════════════════════════════════════════════════
+//  ADMIN: Get Product Stats
+//  GET /api/products/stats
+// ════════════════════════════════════════════════════════════════
+export const getProductStats = async (req, res) => {
+  try {
+    const totalProducts = await Product.countDocuments();
+    const activeProducts = await Product.countDocuments({ status: "active" });
+    const outOfStock = await Product.countDocuments({ stock: 0 });
+    const featured = await Product.countDocuments({ isFeatured: true });
+
+    return sendSuccess(res, 200, "Product stats fetched.", {
+      total: totalProducts,
+      active: activeProducts,
+      outOfStock,
+      featured,
+    });
+  } catch (error) {
+    console.error("getProductStats error:", error);
+    return sendError(res, 500, "Internal server error fetching product stats.");
+  }
+};
+
+

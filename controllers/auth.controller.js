@@ -1,213 +1,260 @@
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
 
+// ─── helpers ─────────────────────────────────────────────────────────────────
+const JWT_SECRET = process.env.JWT_SECRET;
+
+const signToken = (id, role) =>
+  jwt.sign({ id, role }, JWT_SECRET, { expiresIn: "7d" });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMIN AUTH
+// ─────────────────────────────────────────────────────────────────────────────
+
+// POST /api/auth/admin/register
 export const registerAdmin = async (req, res) => {
-    try {
-        const { name, email, password, phoneNumber } = req.body;
-        if (!name || !email || !password || !phoneNumber)
-            return res.status(400).json({ message: "All fields required" });
-        const existingAdmin = await AdminModel.findOne({ email });
-        if (existingAdmin) return res.status(400).json({ message: "Admin exists" });
-        const hashed = await bcrypt.hash(password, 10);
-        const newAdmin = await AdminModel.create({ name, email, password: hashed, phoneNumber });
-        const token = jwt.sign({ id: newAdmin._id, role: "admin" }, JWT_SECRET, {
-            expiresIn: "7d",
-        });
-        return res.status(201).json({
-            message: "Admin created",
-            token,
-            admin: { id: newAdmin._id, name: newAdmin.name, email: newAdmin.email },
-        });
-        res.status(201).json({ message: 'Admin registered successfully' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const { name, email, phoneNumber, password } = req.body;
+
+    // Check duplicate email
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail)
+      return res.status(400).json({ success: false, message: "Email already registered." });
+
+    // Check duplicate phone
+    const existingPhone = await User.findOne({ phone: phoneNumber });
+    if (existingPhone)
+      return res.status(400).json({ success: false, message: "Phone number already registered." });
+
+    // Split name into firstName + lastName (model requires both)
+    const [firstName, ...rest] = name.trim().split(" ");
+    const lastName = rest.join(" ") || firstName;
+
+    const admin = await User.create({
+      firstName,
+      lastName,
+      email,
+      phone: phoneNumber,
+      password,
+      role: "admin",
+    });
+
+    const token = signToken(admin._id, admin.role);
+
+    return res.status(201).json({
+      success: true,
+      message: "Admin registered successfully.",
+      token,
+      admin: { id: admin._id, name: admin.fullName, email: admin.email, role: admin.role },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
-
-
-
-
+// POST /api/auth/admin/login  (email or phone + password)
 export const loginAdmin = async (req, res) => {
-    try {
-        const { identifier, password } = req.body;
-        if (!identifier || !password)
-            return res.status(400).json({ message: "Email or phone number & password required" });
-        const admin = await AdminModel.findOne({
-            $or: [{ email: identifier }, { phoneNumber: identifier }],
-        });
-        if (!admin) return res.status(400).json({ message: "Invalid credentials" });
-        const ok = await bcrypt.compare(password, admin.password);
-        if (!ok) return res.status(400).json({ message: "Invalid credentials" });
-        const token = jwt.sign({ id: admin._id, role: "admin" }, JWT_SECRET, {
-            expiresIn: "7d",
-        });
-        return res.status(200).json({
-            message: "Logged in",
-            token,
-            admin: { id: admin._id, name: admin.name, email: admin.email, phoneNumber: admin.phoneNumber },
-        });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const { identifier, password } = req.body;
+
+    const admin = await User.findOne({
+      $or: [{ email: identifier }, { phone: identifier }],
+      role: { $in: ["admin", "super_admin", "manager"] },
+    }).select("+password");
+
+    if (!admin)
+      return res.status(401).json({ success: false, message: "Invalid credentials." });
+
+    const ok = await admin.comparePassword(password);
+    if (!ok)
+      return res.status(401).json({ success: false, message: "Invalid credentials." });
+
+    const token = signToken(admin._id, admin.role);
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged in successfully.",
+      token,
+      admin: { id: admin._id, name: admin.fullName, email: admin.email, phone: admin.phone, role: admin.role },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
+// POST /api/auth/admin/logout
 export const logoutAdmin = async (req, res) => {
-    try {
-        res.status(201).json({ message: 'Admin logout successfully' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    return res.status(200).json({ success: true, message: "Admin logged out successfully." });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// USER AUTH
+// ─────────────────────────────────────────────────────────────────────────────
 
+// POST /api/auth/user/register
 export const registerUser = async (req, res) => {
-    try {
-        const { name, email, password, phoneNumber } = req.body;
-        if (!name || !email || !password || !phoneNumber)
-            return res.status(400).json({ message: "All fields required" });
-        const existingUser = await UserModel.findOne({ email });
-        if (existingUser) return res.status(400).json({ message: "User exists" });
-        const hashed = await bcrypt.hash(password, 10);
-        const newUser = await UserModel.create({ name, email, password: hashed, phoneNumber });
-        const token = jwt.sign({ id: newUser._id, role: "user" }, JWT_SECRET, {
-            expiresIn: "7d",
-        });
-        return res.status(201).json({
-            message: "User created",
-            token,
-            admin: { id: newUser._id, name: newUser.name, email: newUser.email },
-        });
-        res.status(201).json({ message: 'User registered successfully' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const { name, email, phoneNumber, password } = req.body;
+
+    // Check duplicate email
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail)
+      return res.status(400).json({ success: false, message: "Email already registered." });
+
+    // Check duplicate phone
+    const existingPhone = await User.findOne({ phone: phoneNumber });
+    if (existingPhone)
+      return res.status(400).json({ success: false, message: "Phone number already registered." });
+
+    // Split name into firstName + lastName
+    const [firstName, ...rest] = name.trim().split(" ");
+    const lastName = rest.join(" ") || firstName;
+
+    const user = await User.create({
+      firstName,
+      lastName,
+      email,
+      phone: phoneNumber,
+      password,
+      role: "customer",
+    });
+
+    const token = signToken(user._id, user.role);
+
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully.",
+      token,
+      user: { id: user._id, name: user.fullName, email: user.email, role: user.role },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
-
+// POST /api/auth/user/login  (email or phone + password)
 export const loginUser = async (req, res) => {
-    try {
-        const { identifier, password } = req.body;
-        if (!identifier || !password)
-            return res.status(400).json({ message: "Email or phone number & password required" });
-        const user = await UserModel.findOne({
-            $or: [{ email: identifier }, { phoneNumber: identifier }],
-        });
-        if (!user) return res.status(400).json({ message: "Invalid credentials" });
-        const ok = await bcrypt.compare(password, user.password);
-        if (!ok) return res.status(400).json({ message: "Invalid credentials" });
-        const token = jwt.sign({ id: user._id, role: "user" }, JWT_SECRET, {
-            expiresIn: "7d",
-        });
-        return res.status(200).json({
-            message: "Logged in",
-            token,
-            user: { id: user._id, name: user.name, email: user.email, phoneNumber: user.phoneNumber },
-        });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    const { identifier, password } = req.body;
+
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { phone: identifier }],
+    }).select("+password");
+
+    if (!user)
+      return res.status(401).json({ success: false, message: "Invalid credentials." });
+
+    if (user.isBanned)
+      return res.status(403).json({ success: false, message: "Your account has been banned." });
+
+    const ok = await user.comparePassword(password);
+    if (!ok)
+      return res.status(401).json({ success: false, message: "Invalid credentials." });
+
+    const token = signToken(user._id, user.role);
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged in successfully.",
+      token,
+      user: { id: user._id, name: user.fullName, email: user.email, phone: user.phone, role: user.role },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
+// POST /api/auth/user/logout
 export const logoutUser = async (req, res) => {
-    try {
-        res.status(201).json({ message: 'User logout successfully' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    return res.status(200).json({ success: true, message: "User logged out successfully." });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SHARED AUTH
+// ─────────────────────────────────────────────────────────────────────────────
 
-
+// POST /api/auth/refresh-token
 export const refreshToken = async (req, res) => {
-    try {
-        const { token } = req.body;
-        if (!token) {
-            return res.status(400).json({ message: "Token is required" });
-        }
-        const payload = jwt.verify(token, JWT_SECRET, { ignoreExpiration: true });
-        const newToken = jwt.sign({ id: payload.id, role: payload.role }, JWT_SECRET, { expiresIn: "7d" });
-        return res.status(200).json({ token: newToken });
-    } catch (err) {
-        return res.status(401).json({ message: "Invalid token" });
-    }
+  try {
+    const { token } = req.body;
+
+    const payload = jwt.verify(token, JWT_SECRET, { ignoreExpiration: true });
+    const newToken = signToken(payload.id, payload.role);
+
+    return res.status(200).json({ success: true, token: newToken });
+  } catch (err) {
+    return res.status(401).json({ success: false, message: "Invalid token." });
+  }
 };
 
+// POST /api/auth/change-password  (protected — req.user set by protect middleware)
 export const changePassword = async (req, res) => {
-    try {
-        const { oldPassword, newPassword } = req.body;
-        const { id, role } = req.user;
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const { id } = req.user;
 
-        if (!oldPassword || !newPassword) {
-            return res.status(400).json({ message: "Old password and new password are required" });
-        }
+    const user = await User.findById(id).select("+password");
+    if (!user)
+      return res.status(404).json({ success: false, message: "User not found." });
 
-        let Model = null;
-        if (role === "admin") Model = Admin;
-        else if (role === "user") Model = user;
+    const isMatch = await user.comparePassword(oldPassword);
+    if (!isMatch)
+      return res.status(400).json({ success: false, message: "Old password is incorrect." });
 
-        const user = await Model.findById(id);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+    user.password = newPassword; // pre-save hook will hash it
+    await user.save();
 
-        const isMatch = await bcrypt.compare(oldPassword, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: "Invalid old password" });
-        }
-
-        user.password = await bcrypt.hash(newPassword, 10);
-        await user.save();
-
-        return res.status(200).json({ message: "Password updated successfully" });
-    } catch (err) {
-        return res.status(500).json({ message: err.message });
-    }
+    return res.status(200).json({ success: true, message: "Password updated successfully." });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };
 
+// POST /api/auth/forgot-password
 export const forgotPassword = async (req, res) => {
-    try {
-        const { email } = req.body;
-        if (!email) {
-            return res.status(400).json({ message: "Email is required" });
-        }
+  try {
+    const { email } = req.body;
 
-        let user = await AdminModel.findOne({ email }) || await userModel.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: "User not found with this email" });
-        }
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(404).json({ success: false, message: "No account found with this email." });
 
-        return res.status(200).json({ message: "Password reset link sent successfully", resetToken: "123456" });
-    } catch (err) {
-        return res.status(500).json({ message: err.message });
-    }
+    // TODO: generate a real token, save to DB, and email it
+    const resetToken = "123456"; // placeholder
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset link sent to your email.",
+      resetToken, // remove in production — send via email only
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };
 
+// POST /api/auth/reset-password
 export const resetPassword = async (req, res) => {
-    try {
-        const { email, resetToken, newPassword } = req.body;
-        if (!email || !newPassword) {
-            return res.status(400).json({ message: "Email and newPassword are required" });
-        }
+  try {
+    const { email, resetToken, newPassword } = req.body;
 
-        let Model = null;
-        let user = await AdminModel.findOne({ email });
-        if (user) Model = Admin;
+    // TODO: validate resetToken against stored DB token & expiry
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(404).json({ success: false, message: "User not found." });
 
-        if (!user) {
-            user = await userModel.findOne({ email });
-            if (user) Model = user;
-        }
+    user.password = newPassword; // pre-save hook will hash it
+    await user.save();
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        user.password = await bcrypt.hash(newPassword, 10);
-        await user.save();
-
-        return res.status(200).json({ message: "Password reset successfully" });
-    } catch (err) {
-        return res.status(500).json({ message: err.message });
-    }
+    return res.status(200).json({ success: true, message: "Password reset successfully." });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };

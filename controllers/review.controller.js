@@ -14,7 +14,8 @@ import { createAuditLog } from "../utils/auditLog.utils.js";
 // ─── Create Review ─────────────────────────────────────────────────────────────
 
 export const createReview = asyncHandler(async (req, res) => {
-  const { productId, orderId, rating, title, body } = req.body;
+  const { productId, orderId, rating, title, body, comment, message } = req.body;
+  const reviewBody = body || comment || message;
 
   // Check if user already reviewed this product
   const existing = await Review.findOne({ product: productId, user: req.user._id });
@@ -38,7 +39,7 @@ export const createReview = asyncHandler(async (req, res) => {
     order: orderId,
     rating: Number(rating),
     title,
-    body,
+    body: reviewBody,
     isVerifiedPurchase,
     status: "pending",
   };
@@ -107,20 +108,25 @@ export const getReviews = asyncHandler(async (req, res) => {
 // ─── Admin: Approve / Reject Review ──────────────────────────────────────────
 
 export const moderateReview = asyncHandler(async (req, res) => {
-  const { action } = req.body; // "approve" | "reject"
+  const { action, status } = req.body; // "approve" | "reject"
+  const moderationAction = action || status;
+
+  if (!moderationAction || !["approve", "reject"].includes(moderationAction)) {
+    return errorResponse(res, "Please provide a valid action ('approve' or 'reject').", 400);
+  }
 
   const review = await Review.findById(req.params.id);
   if (!review) return errorResponse(res, "Review not found.", 404);
 
-  review.status = action === "approve" ? "approved" : "rejected";
+  review.status = moderationAction === "approve" ? "approved" : "rejected";
   await review.save(); // post-save hook updates product rating
 
   await createAuditLog({
-    user: req.user, action: `${action.toUpperCase()}_REVIEW`, module: "Review",
+    user: req.user, action: `${moderationAction.toUpperCase()}_REVIEW`, module: "Review",
     targetId: review._id, req,
   });
 
-  return successResponse(res, { review }, `Review ${action}d.`);
+  return successResponse(res, { review }, `Review ${moderationAction}d.`);
 });
 
 // ─── Admin: Reply to Review ───────────────────────────────────────────────────

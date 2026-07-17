@@ -57,7 +57,7 @@ const productSchema = new mongoose.Schema(
       index: true,
     },
 
-    collection: {
+    productCollection: {
       type: String,
       trim: true,
       index: true,
@@ -188,8 +188,8 @@ const productSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ["active", "inactive", "draft"],
-        message: "Status must be one of: active, inactive, draft.",
+        values: ["active", "inactive", "draft", "archived"],
+        message: "Status must be one of: active, inactive, draft, archived.",
       },
       default: "active",
       index: true,
@@ -259,7 +259,7 @@ productSchema.virtual("isInStock").get(function () {
 // Compound indexes for common query patterns
 // ─────────────────────────────────────────────
 productSchema.index({ category: 1, status: 1 });
-productSchema.index({ collection: 1, status: 1 });
+productSchema.index({ productCollection: 1, status: 1 });
 productSchema.index({ price: 1, status: 1 });
 productSchema.index({ ratingAverage: -1, status: 1 });
 productSchema.index({ totalSales: -1, status: 1 });
