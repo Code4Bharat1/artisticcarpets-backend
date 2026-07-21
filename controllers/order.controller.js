@@ -32,10 +32,10 @@ export const createOrder = asyncHandler(async (req, res) => {
   for (const item of items) {
     const product = await Product.findById(item.productId);
     if (!product || product.status !== "active") {
-      return errorResponse(res, `Product not available: ${item.productId}`, 400);
+      return errorResponse(res, `Product not available: {item.productId}`, 400);
     }
     if (product.stock < item.quantity) {
-      return errorResponse(res, `Insufficient stock for: ${product.name}`, 400);
+      return errorResponse(res, `Insufficient stock for: {product.name}`, 400);
     }
 
     const unitPrice = product.discountPrice || product.price;
@@ -72,7 +72,7 @@ export const createOrder = asyncHandler(async (req, res) => {
       return errorResponse(res, "Coupon usage limit reached.", 400);
     }
     if (subtotal < couponDoc.minimumOrderAmount) {
-      return errorResponse(res, `Minimum order amount ₹${couponDoc.minimumOrderAmount} required for this coupon.`, 400);
+      return errorResponse(res, `Minimum order amount ₹{couponDoc.minimumOrderAmount} required for this coupon.`, 400);
     }
 
     // Check per-user usage

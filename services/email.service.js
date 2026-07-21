@@ -114,7 +114,7 @@ export const sendOrderConfirmationEmail = async (user, order) => {
       <tfoot>
         <tr>
           <td colspan="2" style="padding:12px 10px;text-align:right;color:#2D2D2D;font-weight:bold;">Total</td>
-          <td style="padding:12px 10px;text-align:right;color:#8B0000;font-weight:bold;font-size:18px;">₹${order.total.toLocaleString()}</td>
+          <td style="padding:12px 10px;text-align:right;color:#8B0000;font-weight:bold;font-size:18px;">${order.total.toLocaleString()}</td>
         </tr>
       </tfoot>
     </table>
