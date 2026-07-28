@@ -59,6 +59,12 @@ export const createProduct = async (req, res) => {
       metaTitle,
       metaDescription,
       metaKeywords,
+      refundPolicyEnabled,
+      refundPolicyRefundWindow,
+      refundPolicyDescription,
+      refundPolicyReasonRequired,
+      refundPolicyShippingResponsibility,
+      refundPolicyRequiredCondition,
     } = req.body;
 
     const parsedPrice = parseFloat(price);
@@ -92,8 +98,8 @@ export const createProduct = async (req, res) => {
       typeof metaKeywords === "string"
         ? metaKeywords.split(",").map((k) => k.trim()).filter(Boolean)
         : Array.isArray(metaKeywords)
-        ? metaKeywords
-        : [];
+          ? metaKeywords
+          : [];
 
     // ── 9. Create product ──────────────────────
     const product = await Product.create({
@@ -129,6 +135,14 @@ export const createProduct = async (req, res) => {
       metaTitle,
       metaDescription,
       metaKeywords: parsedKeywords,
+      refundPolicy: {
+        enabled: refundPolicyEnabled === "true" || refundPolicyEnabled === true,
+        refundWindow: refundPolicyRefundWindow ? parseInt(refundPolicyRefundWindow, 10) : 0,
+        description: refundPolicyDescription || "",
+        reasonRequired: refundPolicyReasonRequired === "true" || refundPolicyReasonRequired === true,
+        shippingResponsibility: refundPolicyShippingResponsibility || "Customer",
+        requiredCondition: refundPolicyRequiredCondition || "Unused"
+      },
       createdBy: req.user?.id || null,
     });
 
@@ -151,6 +165,40 @@ export const createProduct = async (req, res) => {
     }
 
     return sendError(res, 500, "Internal server error while creating product.");
+  }
+};
+
+// ════════════════════════════════════════════════════════════════
+//  ADMIN: Get All Products (Includes draft, archived, etc.)
+//  GET /api/admin/products
+// ════════════════════════════════════════════════════════════════
+export const getAdminProducts = async (req, res) => {
+  try {
+    const { status, keyword, limit = 100 } = req.query;
+    const filter = {};
+
+    if (status && status !== "all") {
+      filter.status = status;
+    }
+
+    if (keyword) {
+      filter.$or = [
+        { title: { $regex: new RegExp(keyword, "i") } },
+        { sku: { $regex: new RegExp(keyword, "i") } }
+      ];
+    }
+
+    const products = await Product.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit, 10));
+
+    return sendSuccess(res, 200, "Admin products retrieved successfully.", {
+      products,
+      count: products.length
+    });
+  } catch (error) {
+    console.error("getAdminProducts error:", error);
+    return sendError(res, 500, "Internal server error while fetching admin products.");
   }
 };
 
@@ -205,6 +253,12 @@ export const updateProduct = async (req, res) => {
       metaTitle,
       metaDescription,
       metaKeywords,
+      refundPolicyEnabled,
+      refundPolicyRefundWindow,
+      refundPolicyDescription,
+      refundPolicyReasonRequired,
+      refundPolicyShippingResponsibility,
+      refundPolicyRequiredCondition,
     } = req.body;
 
     // ── Price & discount ───────────────────────
@@ -253,8 +307,8 @@ export const updateProduct = async (req, res) => {
         ? typeof metaKeywords === "string"
           ? metaKeywords.split(",").map((k) => k.trim()).filter(Boolean)
           : Array.isArray(metaKeywords)
-          ? metaKeywords
-          : product.metaKeywords
+            ? metaKeywords
+            : product.metaKeywords
         : product.metaKeywords;
 
     // ── Apply all updates ──────────────────────
@@ -300,9 +354,23 @@ export const updateProduct = async (req, res) => {
           ? isNewArrival === "true" || isNewArrival === true
           : product.isNewArrival,
       status: status || product.status,
-      metaTitle: metaTitle ?? product.metaTitle,
-      metaDescription: metaDescription ?? product.metaDescription,
+      metaTitle: metaTitle ?? (product.metaTitle),
+      metaDescription: metaDescription ?? (product.metaDescription),
       metaKeywords: parsedKeywords,
+      refundPolicy: {
+        enabled: refundPolicyEnabled !== undefined 
+          ? (refundPolicyEnabled === "true" || refundPolicyEnabled === true) 
+          : product.refundPolicy?.enabled || false,
+        refundWindow: refundPolicyRefundWindow !== undefined 
+          ? parseInt(refundPolicyRefundWindow, 10) 
+          : product.refundPolicy?.refundWindow || 0,
+        description: refundPolicyDescription ?? (product.refundPolicy?.description || ""),
+        reasonRequired: refundPolicyReasonRequired !== undefined 
+          ? (refundPolicyReasonRequired === "true" || refundPolicyReasonRequired === true) 
+          : product.refundPolicy?.reasonRequired || false,
+        shippingResponsibility: refundPolicyShippingResponsibility ?? (product.refundPolicy?.shippingResponsibility || "Customer"),
+        requiredCondition: refundPolicyRequiredCondition ?? (product.refundPolicy?.requiredCondition || "Unused"),
+      }
     });
 
     await product.save();
@@ -384,7 +452,7 @@ export const bulkUpdateProducts = async (req, res) => {
       // If product lacks a title or price but is being created, it will fail schema validation later,
       // but for bulkWrite upsert based on SKU, we do our best.
       const sku = prod.sku || generateSKU();
-      
+
       // Auto-generate slug if not present but title is
       if (!prod.slug && prod.title) {
         prod.slug = slugify(prod.title, { lower: true, strict: true }) + '-' + Date.now().toString().slice(-4);
@@ -502,6 +570,7 @@ export const getAllProducts = async (req, res) => {
       page = 1,
       limit = 12,
       search,
+      ids,
       category,
       subCategory,
       collection,
@@ -517,6 +586,13 @@ export const getAllProducts = async (req, res) => {
     } = req.query;
 
     const filter = { status: "active" };
+
+    if (ids) {
+      const idArray = ids.split(",").filter(id => mongoose.Types.ObjectId.isValid(id.trim()));
+      if (idArray.length > 0) {
+        filter._id = { $in: idArray };
+      }
+    }
 
     // ── Full-text search ───────────────────────
     if (search) {
@@ -757,5 +833,3 @@ export const getProductStats = async (req, res) => {
     return sendError(res, 500, "Internal server error fetching product stats.");
   }
 };
-
-
