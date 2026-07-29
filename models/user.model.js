@@ -110,6 +110,9 @@ const userSchema = new mongoose.Schema(
 
 // Virtual: full name
 userSchema.virtual("fullName").get(function () {
+  if (this.firstName && this.firstName === this.lastName) {
+    return this.firstName;
+  }
   return `${this.firstName} ${this.lastName}`;
 });
 
@@ -139,7 +142,7 @@ userSchema.methods.toPublic = function () {
 };
 
 // Indexes
-userSchema.index({ email: 1 });
+
 userSchema.index({ role: 1 });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ "addresses.isDefault": 1 });

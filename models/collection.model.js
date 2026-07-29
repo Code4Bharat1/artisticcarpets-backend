@@ -60,7 +60,7 @@ collectionSchema.pre("save", function (next) {
   next();
 });
 
-collectionSchema.index({ slug: 1 });
+
 collectionSchema.index({ isActive: 1 });
 collectionSchema.index({ isFeatured: 1 });
 

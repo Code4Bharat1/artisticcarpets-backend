@@ -28,6 +28,7 @@ import auditLogRouter from "./routes/auditLog.route.js";
 import paymentRouter from "./routes/payment.routes.js";
 import complaintRouter from "./routes/complaint.route.js";
 import refundRouter from "./routes/refund.route.js";
+import materialRouter from "./routes/material.route.js";
 import { sendError } from "./utils/helpers.js";
 
 const PORT = process.env.PORT || 5000;
@@ -116,6 +117,7 @@ app.use("/api/audit-logs", auditLogRouter);
 app.use("/api/complaints", complaintRouter);
 app.use("/api/refunds", refundRouter);
 app.use("/api/damaged-inventory", damageRouter);
+app.use("/api/materials", materialRouter);
 // ─────────────────────────────────────────────
 // 404 handler — catches unmatched routes
 // ─────────────────────────────────────────────

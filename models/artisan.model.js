@@ -52,7 +52,7 @@ artisanSchema.pre("save", function (next) {
   next();
 });
 
-artisanSchema.index({ slug: 1 });
+
 artisanSchema.index({ isActive: 1 });
 
 const Artisan = mongoose.model("Artisan", artisanSchema);

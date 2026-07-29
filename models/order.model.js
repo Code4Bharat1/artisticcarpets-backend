@@ -229,7 +229,7 @@ orderSchema.virtual("itemCount").get(function () {
 });
 
 // Indexes
-orderSchema.index({ orderNumber: 1 });
+
 orderSchema.index({ customer: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });

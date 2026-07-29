@@ -30,7 +30,7 @@ const cmsPageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-cmsPageSchema.index({ pageKey: 1 });
+
 
 const CmsPage = mongoose.model("CmsPage", cmsPageSchema);
 export default CmsPage;

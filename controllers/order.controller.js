@@ -33,10 +33,10 @@ export const createOrder = asyncHandler(async (req, res) => {
   for (const item of items) {
     const product = await Product.findById(item.productId);
     if (!product || product.status !== "active") {
-      return errorResponse(res, `Product not available: {item.productId}`, 400);
+      return errorResponse(res, `Product not available: ${item.productId}`, 400);
     }
     if (product.stock < item.quantity) {
-      return errorResponse(res, `Insufficient stock for: {product.name}`, 400);
+      return errorResponse(res, `Insufficient stock for: ${product.title}`, 400);
     }
 
     const unitPrice = product.discountPrice || product.price;
@@ -204,7 +204,7 @@ export const getMyOrders = asyncHandler(async (req, res) => {
 
   const [orders, total] = await Promise.all([
     Order.find(filter)
-      .select("orderNumber items total status payment.status shipping.trackingNumber createdAt")
+      .select("orderNumber items total status payment.status shipping.trackingNumber createdAt refund")
       .sort("-createdAt")
       .skip(skip)
       .limit(limit)
@@ -282,8 +282,8 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   if (!order) return errorResponse(res, "Order not found.", 404);
 
   const validTransitions = {
-    pending:          ["confirmed", "cancelled"],
-    confirmed:        ["processing", "cancelled"],
+    pending:          ["shipped", "cancelled"],
+    confirmed:        ["shipped", "cancelled"],
     processing:       ["shipped", "cancelled"],
     shipped:          ["out_for_delivery", "returned"],
     out_for_delivery: ["delivered", "returned"],
@@ -319,6 +319,13 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
       eligibleUntil.setDate(eligibleUntil.getDate() + order.refund.refundWindow);
       order.refund.refundEligibleUntil = eligibleUntil;
     }
+  }
+
+  if (status === "refunded") {
+    order.payment = { ...(order.payment?.toObject?.() || {}), status: "refunded" };
+    if (!order.refund) order.refund = {};
+    order.refund.status = "Refunded";
+    order.refund.completedAt = new Date();
   }
 
   order.timeline.push({

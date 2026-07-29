@@ -65,7 +65,7 @@ blogSchema.pre("save", async function (next) {
   next();
 });
 
-blogSchema.index({ slug: 1 });
+
 blogSchema.index({ status: 1 });
 blogSchema.index({ author: 1 });
 blogSchema.index({ publishedAt: -1 });

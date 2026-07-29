@@ -71,7 +71,7 @@ couponSchema.virtual("isExhausted").get(function () {
   return this.usageLimit && this.usedCount >= this.usageLimit;
 });
 
-couponSchema.index({ code: 1 });
+
 couponSchema.index({ isActive: 1 });
 couponSchema.index({ expiresAt: 1 });
 

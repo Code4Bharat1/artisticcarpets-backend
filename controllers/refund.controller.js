@@ -1,5 +1,6 @@
 import Order from "../models/order.model.js";
 import Notification from "../models/notification.model.js";
+import User from "../models/user.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { successResponse, errorResponse, paginatedResponse, parsePagination, buildPagination } from "../utils/apiResponse.js";
 import { createAuditLog } from "../utils/auditLog.utils.js";
@@ -7,7 +8,11 @@ import { createAuditLog } from "../utils/auditLog.utils.js";
 // ─── Request Refund (User) ───────────────────────────────────────────────────
 export const requestRefund = asyncHandler(async (req, res) => {
   const { reason, comment, images } = req.body;
-  const order = await Order.findOne({ _id: req.params.id, customer: req.user._id });
+  const query = { _id: req.params.id };
+  if (req.user.role !== "admin") {
+    query.customer = req.user._id;
+  }
+  const order = await Order.findOne(query);
   
   if (!order) return errorResponse(res, "Order not found.", 404);
 
@@ -16,8 +21,8 @@ export const requestRefund = asyncHandler(async (req, res) => {
     return errorResponse(res, "Refunds are not enabled for this order.", 400);
   }
   
-  if (order.status !== "delivered") {
-    return errorResponse(res, "Refund can only be requested for delivered orders.", 400);
+  if (!["delivered", "returned"].includes(order.status)) {
+    return errorResponse(res, "Refund can only be requested for delivered or returned orders.", 400);
   }
   
   if (order.refund.status !== "None") {
@@ -39,13 +44,17 @@ export const requestRefund = asyncHandler(async (req, res) => {
   await order.save();
 
   // Create notification for admin
-  await Notification.create({
-    user: null, // Global or admin target
+  const admins = await User.find({ role: "admin" }).select("_id");
+  const adminNotifications = admins.map(admin => ({
+    recipient: admin._id,
     title: "New Refund Request",
     message: `A new refund request has been submitted for order ${order.orderNumber}.`,
     type: "system",
     link: `/refunds/${order._id}`,
-  });
+  }));
+  if (adminNotifications.length > 0) {
+    await Notification.insertMany(adminNotifications);
+  }
 
   return successResponse(res, { order }, "Refund requested successfully.");
 });
@@ -139,10 +148,10 @@ export const updateRefundStatus = asyncHandler(async (req, res) => {
 
   // Notify customer
   await Notification.create({
-    user: order.customer,
+    recipient: order.customer._id || order.customer,
     title: `Refund Request ${status}`,
     message: `Your refund request for order ${order.orderNumber} has been ${status.toLowerCase()}.`,
-    type: "order",
+    type: "refund_request",
     link: `/dashboard`,
   });
 

@@ -52,6 +52,14 @@ const emailLayout = (content) => `
 // ─── Send helpers ────────────────────────────────────────────────────────────
 
 const sendEmail = async ({ to, subject, html }) => {
+  // If credentials are not set, mock the email send to prevent EAUTH errors
+  if (!process.env.SMTP_USER || process.env.SMTP_USER === "your_email@gmail.com" || !process.env.SMTP_PASS || process.env.SMTP_PASS === "your_app_password") {
+    console.log(`\n[EMAIL MOCK] Email sending is simulated because real credentials are not set in .env`);
+    console.log(`[EMAIL MOCK] To: ${to}`);
+    console.log(`[EMAIL MOCK] Subject: ${subject}\n`);
+    return { messageId: `mock-${Date.now()}` }; 
+  }
+
   const transporter = createTransporter();
   const info = await transporter.sendMail({ from: FROM, to, subject, html });
   console.log(`📧 Email sent: ${info.messageId}`);

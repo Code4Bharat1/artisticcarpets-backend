@@ -22,7 +22,7 @@ export const getInventoryOverview = asyncHandler(async (req, res) => {
   const filter = { status: { $ne: "archived" } };
   if (search)   filter.$text    = { $search: search };
   if (category) filter.category = category;
-  if (collection) filter.collection = collection;
+  if (collection) filter.productCollection = collection;
 
   if (stockStatus === "in_stock")   filter.stock = { $gt: 10 };
   if (stockStatus === "low_stock")  filter.stock = { $gt: 0, $lte: 10 };
@@ -31,8 +31,8 @@ export const getInventoryOverview = asyncHandler(async (req, res) => {
   const [products, total] = await Promise.all([
     Product.find(filter)
       .populate("category", "name")
-      .populate("collection", "name")
-      .select("name sku mainImage stock reservedStock minimumStock price warehouse isActive")
+      .populate("productCollection", "name")
+      .select("title sku thumbnail stock reservedStock minimumStock price warehouse isActive")
       .sort(sort)
       .skip(skip)
       .limit(limit),
@@ -64,6 +64,7 @@ export const adjustStock = asyncHandler(async (req, res) => {
       sku: product.sku,
       type: type || "adjustment",
       quantity: Number(quantity),
+      productImage:product.mainImage,
       previousStock,
       newStock,
       warehouse,
@@ -87,7 +88,7 @@ export const adjustStock = asyncHandler(async (req, res) => {
   });
 
   return successResponse(res, {
-    product: { _id: product._id, title: product.title, stock: product.stock, sku: product.sku },
+    product: { _id: product._id, title: product.title, productImage: product.thumbnail, stock: product.stock, sku: product.sku },
   }, "Stock adjusted.");
 });
 
@@ -102,8 +103,14 @@ export const bulkStockUpdate = asyncHandler(async (req, res) => {
   const results = [];
 
   for (const u of updates) {
-    const product = await Product.findById(u.productId);
-    if (!product) { results.push({ productId: u.productId, error: "Not found" }); continue; }
+    let product;
+    if (u.productId) {
+      product = await Product.findById(u.productId);
+    } else if (u.sku) {
+      product = await Product.findOne({ sku: u.sku });
+    }
+    
+    if (!product) { results.push({ sku: u.sku, productId: u.productId, error: "Not found" }); continue; }
 
     const previousStock = product.stock;
     product.stock = Number(u.stock);
@@ -113,6 +120,7 @@ export const bulkStockUpdate = asyncHandler(async (req, res) => {
       product: product._id,
       sku: product.sku,
       type: "adjustment",
+      mainImage: product.mainImage,
       quantity: product.stock - previousStock,
       previousStock,
       newStock: product.stock,
