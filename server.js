@@ -49,7 +49,7 @@ app.use(
     origin: [
       process.env.CORS_ORIGIN,
       "https://admin.artisticcarpets.nexcorealliance.com",
-      "https://aartisticcarpets.nexcorealliance.com",
+      "https://artisticcarpets.nexcorealliance.com",
       "http://localhost:3000",
       "http://localhost:3001"
     ].filter(Boolean),
