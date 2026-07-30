@@ -21,6 +21,6 @@ router.get  ("/:id"        , protect, getOrderById);
 router.get  ("/"                    , protect, adminOnly, getOrders);
 router.get  ("/stats/overview"      , protect, adminOnly, getOrderStats);
 router.get  ("/stats/revenue-chart" , protect, adminOnly, getRevenueChart);
-router.patch("/:id/status"          , protect, adminOnly, updateOrderStatus);
+router.post ("/:id/status"          , protect, adminOnly, updateOrderStatus);
 router.post ("/:id/notes"           , protect, adminOnly, addInternalNote);
 export default router;
