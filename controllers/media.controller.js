@@ -14,14 +14,15 @@ import { createAuditLog } from "../utils/auditLog.utils.js";
 // ─── Upload Media ─────────────────────────────────────────────────────────────
 
 export const uploadMedia = asyncHandler(async (req, res) => {
-  if (!req.files?.length) {
+  const files = req.files || (req.file ? [req.file] : []);
+  if (!files.length) {
     return errorResponse(res, "No files uploaded.", 400);
   }
 
   const { folder = "general" } = req.body;
 
   const uploadedFiles = await Promise.all(
-    req.files.map(async (file) => {
+    files.map(async (file) => {
       const url = buildFileUrl(req, file);
       const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
 
