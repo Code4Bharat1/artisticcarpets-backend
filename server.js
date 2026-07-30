@@ -27,7 +27,6 @@ import cmsRouter from "./routes/cms.route.js";
 import auditLogRouter from "./routes/auditLog.route.js";
 import paymentRouter from "./routes/payment.routes.js";
 import complaintRouter from "./routes/complaint.route.js";
-import refundRouter from "./routes/refund.route.js";
 import materialRouter from "./routes/material.route.js";
 import { sendError } from "./utils/helpers.js";
 
@@ -122,7 +121,6 @@ app.use("/api/notifications", notificationRouter);
 app.use("/api/cms", cmsRouter);
 app.use("/api/audit-logs", auditLogRouter);
 app.use("/api/complaints", complaintRouter);
-app.use("/api/refunds", refundRouter);
 app.use("/api/damaged-inventory", damageRouter);
 app.use("/api/materials", materialRouter);
 // ─────────────────────────────────────────────
