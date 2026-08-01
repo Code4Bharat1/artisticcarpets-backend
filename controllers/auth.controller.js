@@ -1,8 +1,11 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import { OAuth2Client } from "google-auth-library";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 const JWT_SECRET = process.env.JWT_SECRET;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID_HERE";
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const signToken = (id, role) =>
   jwt.sign({ id, role }, JWT_SECRET, { expiresIn: "7d" });
@@ -174,6 +177,65 @@ export const logoutUser = async (req, res) => {
     return res.status(200).json({ success: true, message: "User logged out successfully." });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// POST /api/auth/user/google
+export const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ success: false, message: "Google token is required." });
+    }
+
+    // Verify token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: GOOGLE_CLIENT_ID,
+    });
+    
+    const payload = ticket.getPayload();
+    const { email, given_name, family_name, picture, sub } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // User exists, check if banned
+      if (user.isBanned) {
+        return res.status(403).json({ success: false, message: "Your account has been banned." });
+      }
+      
+      // If user exists but no googleId, optionally update it
+      if (!user.googleId) {
+        user.googleId = sub;
+        user.authProvider = "google";
+        if (!user.avatar) user.avatar = picture;
+        await user.save();
+      }
+    } else {
+      // Create new user
+      user = await User.create({
+        firstName: given_name || "Google",
+        lastName: family_name || "User",
+        email,
+        googleId: sub,
+        authProvider: "google",
+        avatar: picture,
+        role: "customer",
+        isEmailVerified: true, // Google emails are pre-verified
+      });
+    }
+
+    const jwtToken = signToken(user._id, user.role);
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged in with Google successfully.",
+      token: jwtToken,
+      user: { id: user._id, name: user.fullName, email: user.email, phone: user.phone, role: user.role, avatar: user.avatar },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Google Authentication failed. Please verify your client ID." });
   }
 };
 

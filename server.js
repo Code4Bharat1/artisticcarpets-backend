@@ -19,6 +19,7 @@ import reviewRouter from "./routes/review.route.js";
 import couponRouter from "./routes/coupon.route.js";
 import blogRouter from "./routes/blog.route.js";
 import artisanRouter from "./routes/artisan.route.js";
+import galleryRouter from "./routes/gallery.route.js";
 import inventoryRouter from "./routes/inventory.route.js";
 import analyticsRouter from "./routes/analytics.route.js";
 import mediaRouter from "./routes/media.route.js";
@@ -28,6 +29,8 @@ import auditLogRouter from "./routes/auditLog.route.js";
 import paymentRouter from "./routes/payment.routes.js";
 import complaintRouter from "./routes/complaint.route.js";
 import materialRouter from "./routes/material.route.js";
+import instagramRouter from "./routes/instagramRoutes.js";
+import { initInstagramCron } from "./cron/instagramSync.js";
 import { sendError } from "./utils/helpers.js";
 
 const PORT = process.env.PORT || 5000;
@@ -113,6 +116,7 @@ app.use("/api/payment", paymentRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/coupons", couponRouter);
 app.use("/api/blogs", blogRouter);
+app.use("/api/gallery", galleryRouter);
 app.use("/api/artisans", artisanRouter);
 app.use("/api/inventory", inventoryRouter);
 app.use("/api/analytics", analyticsRouter);
@@ -123,6 +127,7 @@ app.use("/api/audit-logs", auditLogRouter);
 app.use("/api/complaints", complaintRouter);
 app.use("/api/damaged-inventory", damageRouter);
 app.use("/api/materials", materialRouter);
+app.use("/api/instagram", instagramRouter);
 // ─────────────────────────────────────────────
 // 404 handler — catches unmatched routes
 // ─────────────────────────────────────────────
@@ -152,6 +157,7 @@ app.use((err, _req, res, _next) => {
 const startServer = async () => {
   try {
     await connectDB();
+    initInstagramCron();
 
     const server = app.listen(PORT, () => {
       console.log(`\n🚀 Server running in ${process.env.NODE_ENV || "development"} mode`);

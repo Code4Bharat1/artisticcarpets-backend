@@ -11,6 +11,7 @@ import {
   changePassword,
   forgotPassword,
   resetPassword,
+  googleLogin,
 } from "../controllers/auth.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
@@ -78,6 +79,9 @@ router.post(
 
 // POST /api/auth/user/logout  (protected)
 router.post("/user/logout", protect, logoutUser);
+
+// POST /api/auth/user/google
+router.post("/user/google", googleLogin);
 
 // ─────────────────────────────────────────────
 // Shared Auth
