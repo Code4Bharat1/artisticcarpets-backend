@@ -188,14 +188,31 @@ export const googleLogin = async (req, res) => {
       return res.status(400).json({ success: false, message: "Google token is required." });
     }
 
-    // Verify token
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience: GOOGLE_CLIENT_ID,
-    });
-    
-    const payload = ticket.getPayload();
-    const { email, given_name, family_name, picture, sub } = payload;
+    let email, given_name, family_name, picture, sub;
+
+    try {
+      // First try to verify it as an id_token
+      const ticket = await googleClient.verifyIdToken({
+        idToken: token,
+        audience: GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      ({ email, given_name, family_name, picture, sub } = payload);
+    } catch (e) {
+      // If it fails, try to use it as an access_token (which useGoogleLogin returns by default)
+      try {
+        const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error_description || "Invalid access token");
+        
+        ({ email, given_name, family_name, picture, sub } = data);
+      } catch (err) {
+        return res.status(500).json({ success: false, message: "Google Authentication failed. Invalid token." });
+      }
+    }
 
     let user = await User.findOne({ email });
 

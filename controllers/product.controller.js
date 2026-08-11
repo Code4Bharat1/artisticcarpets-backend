@@ -174,11 +174,15 @@ export const createProduct = async (req, res) => {
 // ════════════════════════════════════════════════════════════════
 export const getAdminProducts = async (req, res) => {
   try {
-    const { status, keyword, limit = 100 } = req.query;
+    const { status, keyword, category, limit = 100 } = req.query;
     const filter = {};
 
     if (status && status !== "all") {
       filter.status = status;
+    }
+
+    if (category && category !== "all") {
+      filter.category = { $regex: new RegExp(category, "i") };
     }
 
     if (keyword) {

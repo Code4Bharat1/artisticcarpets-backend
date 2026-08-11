@@ -53,7 +53,8 @@ app.use(
       "https://admin.artisticcarpets.nexcorealliance.com",
       "https://artisticcarpets.nexcorealliance.com",
       "http://localhost:3000",
-      "http://localhost:3001"
+      "http://localhost:3001",
+      "https://www.artisticcarpets.nexcorealliance.com"
     ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
