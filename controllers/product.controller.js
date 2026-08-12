@@ -1,6 +1,8 @@
 import { validationResult } from "express-validator";
 import slugify from "slugify";
 import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
 
 import Product from "../models/product.model.js";
 import {
@@ -91,7 +93,13 @@ export const createProduct = async (req, res) => {
     // ── 7. Build image objects from Multer files
     const thumbnailFile = req.files?.thumbnail?.[0];
     const thumbnail = thumbnailFile ? buildImageObject(thumbnailFile) : null;
-    const images = req.files.images.map(buildImageObject);
+    const images = req.files.images ? req.files.images.map(buildImageObject) : [];
+
+    const textureImageFile = req.files?.textureImage?.[0];
+    const textureImage = textureImageFile ? buildImageObject(textureImageFile) : null;
+
+    const model3DFile = req.files?.model3D?.[0];
+    const model3D = model3DFile ? model3DFile.path.replace(/\\/g, "/").split("uploads")[1] : null;
 
     // ── 8. Parse metaKeywords (comma string → array)
     const parsedKeywords =
@@ -127,6 +135,8 @@ export const createProduct = async (req, res) => {
       weight,
       thumbnail,
       images,
+      textureImage,
+      model3D: model3D ? `/uploads${model3D}` : null,
       isFeatured: isFeatured === "true" || isFeatured === true,
       isTrending: isTrending === "true" || isTrending === true,
       isBestSeller: isBestSeller === "true" || isBestSeller === true,
@@ -155,6 +165,8 @@ export const createProduct = async (req, res) => {
       const allFiles = [
         ...(req.files?.thumbnail || []),
         ...(req.files?.images || []),
+        ...(req.files?.textureImage || []),
+        ...(req.files?.model3D || []),
       ].map((f) => f.path);
       await deleteFiles(allFiles);
     }
@@ -174,15 +186,11 @@ export const createProduct = async (req, res) => {
 // ════════════════════════════════════════════════════════════════
 export const getAdminProducts = async (req, res) => {
   try {
-    const { status, keyword, category, limit = 100 } = req.query;
+    const { status, keyword, limit = 100 } = req.query;
     const filter = {};
 
     if (status && status !== "all") {
       filter.status = status;
-    }
-
-    if (category && category !== "all") {
-      filter.category = { $regex: new RegExp(category, "i") };
     }
 
     if (keyword) {
@@ -305,6 +313,27 @@ export const updateProduct = async (req, res) => {
       images = req.files.images.map(buildImageObject);
     }
 
+    // ── 3D Model & Texture ─────────────────────
+    let textureImage = product.textureImage;
+    if (req.files?.textureImage?.[0]) {
+      if (product.textureImage?.path) await deleteFile(product.textureImage.path);
+      textureImage = buildImageObject(req.files.textureImage[0]);
+    }
+
+    let model3D = product.model3D;
+    if (req.files?.model3D?.[0]) {
+      if (product.model3D) {
+        // Remove /uploads/ prefix for path resolution in some setups, or use it directly
+        // Assuming deleteFile handles the raw path or URL. Our helper deleteFile uses path.join
+        const oldModelPath = path.join(process.cwd(), product.model3D);
+        if (fs.existsSync(oldModelPath)) {
+           fs.unlinkSync(oldModelPath);
+        }
+      }
+      const rawModelPath = req.files.model3D[0].path.replace(/\\/g, "/").split("uploads")[1];
+      model3D = `/uploads${rawModelPath}`;
+    }
+
     // ── metaKeywords ───────────────────────────
     const parsedKeywords =
       metaKeywords !== undefined
@@ -341,6 +370,8 @@ export const updateProduct = async (req, res) => {
       weight: weight ?? product.weight,
       thumbnail,
       images,
+      textureImage,
+      model3D,
       isFeatured:
         isFeatured !== undefined
           ? isFeatured === "true" || isFeatured === true
@@ -362,15 +393,15 @@ export const updateProduct = async (req, res) => {
       metaDescription: metaDescription ?? (product.metaDescription),
       metaKeywords: parsedKeywords,
       refundPolicy: {
-        enabled: refundPolicyEnabled !== undefined 
-          ? (refundPolicyEnabled === "true" || refundPolicyEnabled === true) 
+        enabled: refundPolicyEnabled !== undefined
+          ? (refundPolicyEnabled === "true" || refundPolicyEnabled === true)
           : product.refundPolicy?.enabled || false,
-        refundWindow: refundPolicyRefundWindow !== undefined 
-          ? parseInt(refundPolicyRefundWindow, 10) 
+        refundWindow: refundPolicyRefundWindow !== undefined
+          ? parseInt(refundPolicyRefundWindow, 10)
           : product.refundPolicy?.refundWindow || 0,
         description: refundPolicyDescription ?? (product.refundPolicy?.description || ""),
-        reasonRequired: refundPolicyReasonRequired !== undefined 
-          ? (refundPolicyReasonRequired === "true" || refundPolicyReasonRequired === true) 
+        reasonRequired: refundPolicyReasonRequired !== undefined
+          ? (refundPolicyReasonRequired === "true" || refundPolicyReasonRequired === true)
           : product.refundPolicy?.reasonRequired || false,
         shippingResponsibility: refundPolicyShippingResponsibility ?? (product.refundPolicy?.shippingResponsibility || "Customer"),
         requiredCondition: refundPolicyRequiredCondition ?? (product.refundPolicy?.requiredCondition || "Unused"),
@@ -549,6 +580,8 @@ export const deleteProduct = async (req, res) => {
     // ── Collect all file paths to delete ───────
     const filesToDelete = [];
     if (product.thumbnail?.path) filesToDelete.push(product.thumbnail.path);
+    if (product.textureImage?.path) filesToDelete.push(product.textureImage.path);
+    if (product.model3D) filesToDelete.push(product.model3D);
     product.images.forEach((img) => filesToDelete.push(img.path));
 
     // ── Delete from DB first ───────────────────

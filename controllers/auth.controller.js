@@ -210,7 +210,8 @@ export const googleLogin = async (req, res) => {
         
         ({ email, given_name, family_name, picture, sub } = data);
       } catch (err) {
-        return res.status(500).json({ success: false, message: "Google Authentication failed. Invalid token." });
+        console.error("Access Token Verification Error:", err);
+        return res.status(500).json({ success: false, message: "Google Authentication failed. Invalid token. Details: " + err.message });
       }
     }
 
@@ -252,7 +253,8 @@ export const googleLogin = async (req, res) => {
       user: { id: user._id, name: user.fullName, email: user.email, phone: user.phone, role: user.role, avatar: user.avatar },
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Google Authentication failed. Please verify your client ID." });
+    console.error("Google Auth Error:", error);
+    return res.status(500).json({ success: false, message: "Google Authentication failed: " + error.message });
   }
 };
 

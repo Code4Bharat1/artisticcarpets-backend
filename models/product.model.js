@@ -191,9 +191,19 @@ const productSchema = new mongoose.Schema(
       type: [imageSchema],
       default: [],
       validate: {
-        validator: (arr) => arr.length <= 10,
-        message: "A product can have a maximum of 10 images.",
+        validator: (arr) => arr.length <= 20,
+        message: "A product can have a maximum of 20 images.",
       },
+    },
+
+    model3D: {
+      type: String,
+      default: null,
+    },
+
+    textureImage: {
+      type: imageSchema,
+      default: null,
     },
 
     // ── Flags ──────────────────────────────────

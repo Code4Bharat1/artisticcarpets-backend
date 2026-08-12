@@ -48,14 +48,20 @@ const app = express();
 // ─────────────────────────────────────────────
 app.use(
   cors({
-    origin: [
-      process.env.CORS_ORIGIN,
-      "https://admin.artisticcarpets.nexcorealliance.com",
-      "https://artisticcarpets.nexcorealliance.com",
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "https://www.artisticcarpets.nexcorealliance.com"
-    ].filter(Boolean),
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        process.env.CORS_ORIGIN,
+        "https://admin.artisticcarpets.nexcorealliance.com",
+        "https://artisticcarpets.nexcorealliance.com",
+        "https://www.artisticcarpets.nexcorealliance.com"
+      ].filter(Boolean);
+
+      if (!origin || origin.startsWith("http://localhost:") || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

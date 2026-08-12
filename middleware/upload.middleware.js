@@ -57,15 +57,19 @@ const makeStorage = (folder) =>
 // ─────────────────────────────────────────────
 // MIME-type filter — images only
 // ─────────────────────────────────────────────
-const imageFilter = (_req, file, cb) => {
-  const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-  if (allowed.includes(file.mimetype)) {
+const mediaFilter = (_req, file, cb) => {
+  const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp", "model/gltf-binary", "application/octet-stream"];
+  
+  // Extra check for GLB files since mimetype can be octet-stream
+  const isGLB = file.originalname.toLowerCase().endsWith('.glb');
+
+  if (allowed.includes(file.mimetype) || isGLB) {
     cb(null, true);
   } else {
     cb(
       new multer.MulterError(
         "LIMIT_UNEXPECTED_FILE",
-        `Unsupported type: ${file.mimetype}. Allowed: jpg, jpeg, png, webp.`
+        `Unsupported type: ${file.mimetype}. Allowed: jpg, jpeg, png, webp, glb.`
       ),
       false
     );
@@ -78,6 +82,7 @@ const imageFilter = (_req, file, cb) => {
 const limits5MB  = { fileSize: 5 * 1024 * 1024 };
 const limits2MB  = { fileSize: 2 * 1024 * 1024 };
 const limits10MB = { fileSize: 10 * 1024 * 1024 };
+const limits50MB = { fileSize: 50 * 1024 * 1024 };
 
 /**
  * Product images — thumbnail (×1) + images (×10)
@@ -85,11 +90,13 @@ const limits10MB = { fileSize: 10 * 1024 * 1024 };
  */
 export const uploadProductImages = multer({
   storage:    makeStorage(FOLDERS.products),
-  fileFilter: imageFilter,
-  limits:     limits5MB,
+  fileFilter: mediaFilter,
+  limits:     limits50MB, // Increased for high-res images and 3D models
 }).fields([
   { name: "thumbnail", maxCount: 1 },
-  { name: "images",    maxCount: 10 },
+  { name: "images",    maxCount: 20 },
+  { name: "textureImage", maxCount: 1 },
+  { name: "model3D",   maxCount: 1 },
 ]);
 
 /**
@@ -98,7 +105,7 @@ export const uploadProductImages = multer({
  */
 export const uploadAvatar = multer({
   storage:    makeStorage(FOLDERS.avatars),
-  fileFilter: imageFilter,
+  fileFilter: mediaFilter, // Was imageFilter
   limits:     limits2MB,
 }).single("avatar");
 
@@ -108,7 +115,7 @@ export const uploadAvatar = multer({
  */
 export const uploadMedia = multer({
   storage:    makeStorage(FOLDERS.media),
-  fileFilter: imageFilter,
+  fileFilter: mediaFilter, // Was imageFilter
   limits:     limits10MB,
 }).single("file");
 
@@ -120,7 +127,7 @@ export const uploadMedia = multer({
 export const uploadSingleImage = (folder) =>
   multer({
     storage:    makeStorage(folder),
-    fileFilter: imageFilter,
+    fileFilter: mediaFilter, // Was imageFilter
     limits:     limits5MB,
   }).single("image");
 
