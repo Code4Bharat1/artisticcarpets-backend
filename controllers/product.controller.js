@@ -145,7 +145,7 @@ export const createProduct = async (req, res) => {
       discountPrice: parsedDiscountPrice,
       discountPercentage,
       sku: finalSKU,
-      stock: stock !== undefined ? parseInt(stock, 10) : 0,
+      stock: (stock === "" || stock === undefined) ? 0 : parseInt(stock, 10),
       material,
       variants: parsedVariants,
       shape,
@@ -165,7 +165,7 @@ export const createProduct = async (req, res) => {
       isBestSeller: isBestSeller === "true" || isBestSeller === true,
       isNewArrival: isNewArrival === "true" || isNewArrival === true,
       status: status || "active",
-      hoverImageIndex: hoverImageIndex !== undefined ? parseInt(hoverImageIndex, 10) : 0,
+      hoverImageIndex: (hoverImageIndex === "" || hoverImageIndex === undefined) ? 0 : parseInt(hoverImageIndex, 10),
       metaTitle,
       metaDescription,
       metaKeywords: parsedKeywords,
@@ -314,7 +314,7 @@ export const updateProduct = async (req, res) => {
     }
 
     // ── Price & discount ───────────────────────
-    let calculatedPrice = price !== undefined ? parseFloat(price) : product.price;
+    let calculatedPrice = (price !== undefined && price !== "") ? parseFloat(price) : product.price;
     if (parsedVariants && parsedVariants.length > 0) {
       const minVariantPrice = Math.min(...parsedVariants.map(v => Number(v.price)));
       if (!isNaN(minVariantPrice)) {
@@ -426,7 +426,7 @@ export const updateProduct = async (req, res) => {
       discountPrice: parsedDiscountPrice,
       discountPercentage,
       sku: sku?.trim() ? sku.trim().toUpperCase() : product.sku,
-      stock: stock !== undefined ? parseInt(stock, 10) : product.stock,
+      stock: (stock === "" || stock === undefined) ? product.stock : parseInt(stock, 10),
       material: material ?? product.material,
       variants: parsedVariants,
       shape: shape ?? product.shape,
@@ -458,7 +458,7 @@ export const updateProduct = async (req, res) => {
           ? isNewArrival === "true" || isNewArrival === true
           : product.isNewArrival,
       status: status || product.status,
-      hoverImageIndex: hoverImageIndex !== undefined ? parseInt(hoverImageIndex, 10) : product.hoverImageIndex,
+      hoverImageIndex: (hoverImageIndex === "" || hoverImageIndex === undefined) ? product.hoverImageIndex : parseInt(hoverImageIndex, 10),
       metaTitle: metaTitle ?? (product.metaTitle),
       metaDescription: metaDescription ?? (product.metaDescription),
       metaKeywords: parsedKeywords,
