@@ -200,7 +200,12 @@ export const createProduct = async (req, res) => {
       return sendError(res, 409, `Duplicate value for field: ${field}.`);
     }
 
-    return sendError(res, 500, "Internal server error while creating product.");
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return sendError(res, 400, "Validation Error", messages);
+    }
+
+    return sendError(res, 500, "Internal server error while creating product: " + error.message);
   }
 };
 
@@ -484,7 +489,12 @@ export const updateProduct = async (req, res) => {
       return sendError(res, 409, `Duplicate value for field: ${field}.`);
     }
 
-    return sendError(res, 500, "Internal server error while updating product.");
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return sendError(res, 400, "Validation Error", messages);
+    }
+
+    return sendError(res, 500, "Internal server error while updating product: " + error.message);
   }
 };
 
