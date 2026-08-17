@@ -284,6 +284,13 @@ const productSchema = new mongoose.Schema(
       default: [],
     },
 
+    // ── Media ──────────────────────────────────
+    hoverImageIndex: {
+      type: Number,
+      default: 0,
+      min: [0, "Hover image index cannot be negative."],
+    },
+
     // ── Ownership ──────────────────────────────
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

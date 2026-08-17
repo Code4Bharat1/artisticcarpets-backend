@@ -67,6 +67,7 @@ export const createProduct = async (req, res) => {
       refundPolicyReasonRequired,
       refundPolicyShippingResponsibility,
       refundPolicyRequiredCondition,
+      hoverImageIndex,
     } = req.body;
 
     let parsedVariants = [];
@@ -164,6 +165,7 @@ export const createProduct = async (req, res) => {
       isBestSeller: isBestSeller === "true" || isBestSeller === true,
       isNewArrival: isNewArrival === "true" || isNewArrival === true,
       status: status || "active",
+      hoverImageIndex: hoverImageIndex !== undefined ? parseInt(hoverImageIndex, 10) : 0,
       metaTitle,
       metaDescription,
       metaKeywords: parsedKeywords,
@@ -293,6 +295,8 @@ export const updateProduct = async (req, res) => {
       refundPolicyReasonRequired,
       refundPolicyShippingResponsibility,
       refundPolicyRequiredCondition,
+      hoverImageIndex,
+      keptImagePaths,
     } = req.body;
 
     let parsedVariants = product.variants || [];
@@ -343,13 +347,34 @@ export const updateProduct = async (req, res) => {
       thumbnail = buildImageObject(req.files.thumbnail[0]);
     }
 
-    // ── Images replacement ─────────────────────
+    // ── Images replacement / append ────────────
     let images = product.images;
+    
+    if (keptImagePaths !== undefined) {
+      let parsedKept = [];
+      try {
+        parsedKept = typeof keptImagePaths === "string" ? JSON.parse(keptImagePaths) : keptImagePaths;
+      } catch (e) {
+        parsedKept = [];
+      }
+      
+      const removedImages = product.images.filter(img => !parsedKept.includes(img.path));
+      if (removedImages.length > 0) {
+        await deleteFiles(removedImages.map(img => img.path));
+      }
+      images = product.images.filter(img => parsedKept.includes(img.path));
+    }
+
     if (req.files?.images && req.files.images.length > 0) {
-      // Delete all old images from disk
-      const oldPaths = product.images.map((img) => img.path);
-      await deleteFiles(oldPaths);
-      images = req.files.images.map(buildImageObject);
+      const newImages = req.files.images.map(buildImageObject);
+      images = keptImagePaths !== undefined ? [...images, ...newImages] : newImages;
+      
+      // If keptImagePaths wasn't provided, it means they are using the old all-or-nothing upload pattern.
+      // So delete all old images if new ones are uploaded.
+      if (keptImagePaths === undefined) {
+        const oldPaths = product.images.map((img) => img.path);
+        await deleteFiles(oldPaths);
+      }
     }
 
     // ── 3D Model & Texture ─────────────────────
@@ -428,6 +453,7 @@ export const updateProduct = async (req, res) => {
           ? isNewArrival === "true" || isNewArrival === true
           : product.isNewArrival,
       status: status || product.status,
+      hoverImageIndex: hoverImageIndex !== undefined ? parseInt(hoverImageIndex, 10) : product.hoverImageIndex,
       metaTitle: metaTitle ?? (product.metaTitle),
       metaDescription: metaDescription ?? (product.metaDescription),
       metaKeywords: parsedKeywords,
