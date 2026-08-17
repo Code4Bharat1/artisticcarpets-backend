@@ -202,7 +202,7 @@ export const createProduct = async (req, res) => {
 
     if (error.name === "ValidationError") {
       const messages = Object.values(error.errors).map((val) => val.message);
-      return sendError(res, 400, "Validation Error", messages);
+      return sendError(res, 400, "Validation Error: " + messages.join(", "), messages);
     }
 
     return sendError(res, 500, "Internal server error while creating product: " + error.message);
