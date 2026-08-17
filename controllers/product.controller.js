@@ -122,8 +122,13 @@ export const createProduct = async (req, res) => {
 
     // ── 7. Build image objects from Multer files
     const thumbnailFile = req.files?.thumbnail?.[0];
-    const thumbnail = thumbnailFile ? buildImageObject(thumbnailFile) : null;
+    let thumbnail = thumbnailFile ? buildImageObject(thumbnailFile) : null;
     const images = req.files.images ? req.files.images.map(buildImageObject) : [];
+
+    // Fallback: use first image as thumbnail if no thumbnail was uploaded
+    if (!thumbnail && images.length > 0) {
+      thumbnail = images[0];
+    }
 
     const textureImageFile = req.files?.textureImage?.[0];
     const textureImage = textureImageFile ? buildImageObject(textureImageFile) : null;
