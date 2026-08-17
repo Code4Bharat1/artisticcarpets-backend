@@ -40,7 +40,7 @@ const createProductValidation = [
     .isLength({ max: 200 }).withMessage("Title cannot exceed 200 characters."),
 
   body("price")
-    .notEmpty().withMessage("Price is required.")
+    .optional({ checkFalsy: true })
     .isFloat({ min: 0 }).withMessage("Price must be a non-negative number."),
 
   body("category")
@@ -51,18 +51,18 @@ const createProductValidation = [
     .isFloat({ min: 0 }).withMessage("Discount price must be a non-negative number."),
 
   body("stock")
-    .optional()
+    .optional({ checkFalsy: true })
     .isInt({ min: 0 }).withMessage("Stock cannot be negative."),
 ];
 
 /** Validation rules for updating a product */
 const updateProductValidation = [
   body("title")
-    .optional()
+    .optional({ checkFalsy: true })
     .isLength({ min: 1, max: 200 }).withMessage("Title must be 1-200 characters."),
 
   body("price")
-    .optional()
+    .optional({ checkFalsy: true })
     .isFloat({ min: 0 }).withMessage("Price must be a non-negative number."),
 
   body("discountPrice")
@@ -70,7 +70,7 @@ const updateProductValidation = [
     .isFloat({ min: 0 }).withMessage("Discount price must be a non-negative number."),
 
   body("stock")
-    .optional()
+    .optional({ checkFalsy: true })
     .isInt({ min: 0 }).withMessage("Stock cannot be negative."),
 ];
 
