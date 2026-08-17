@@ -63,10 +63,22 @@ const productSchema = new mongoose.Schema(
       index: true,
     },
 
-    // ── Pricing ────────────────────────────────
+    // ── Pricing & Variants ─────────────────────
+    variants: {
+      type: [
+        {
+          size: { type: String, required: true },
+          price: { type: Number, required: true },
+          discountPrice: { type: Number, default: null },
+          stock: { type: Number, default: 0 },
+        }
+      ],
+      default: []
+    },
+
     price: {
       type: Number,
-      required: [true, "Price is required."],
+      required: false, // will be auto-calculated from variants
       min: [0, "Price cannot be negative."],
     },
 

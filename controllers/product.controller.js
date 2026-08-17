@@ -44,7 +44,7 @@ export const createProduct = async (req, res) => {
       sku,
       stock,
       material,
-      size,
+      variants,
       shape,
       color,
       style,
@@ -69,7 +69,29 @@ export const createProduct = async (req, res) => {
       refundPolicyRequiredCondition,
     } = req.body;
 
-    const parsedPrice = parseFloat(price);
+    let parsedVariants = [];
+    if (variants) {
+      try {
+        parsedVariants = typeof variants === "string" ? JSON.parse(variants) : variants;
+      } catch (e) {
+        return sendError(res, 400, "Invalid variants format.");
+      }
+    }
+
+    // Auto-calculate base price from variants if present
+    let calculatedPrice = price ? parseFloat(price) : null;
+    if (parsedVariants.length > 0) {
+      const minVariantPrice = Math.min(...parsedVariants.map(v => Number(v.price)));
+      if (!isNaN(minVariantPrice)) {
+        calculatedPrice = minVariantPrice;
+      }
+    }
+
+    if (calculatedPrice === null || isNaN(calculatedPrice)) {
+       calculatedPrice = 0;
+    }
+
+    const parsedPrice = calculatedPrice;
     const parsedDiscountPrice = discountPrice ? parseFloat(discountPrice) : null;
 
     // ── 3. Discount price validation ───────────
@@ -124,7 +146,7 @@ export const createProduct = async (req, res) => {
       sku: finalSKU,
       stock: stock !== undefined ? parseInt(stock, 10) : 0,
       material,
-      size,
+      variants: parsedVariants,
       shape,
       color,
       style,
@@ -248,7 +270,7 @@ export const updateProduct = async (req, res) => {
       sku,
       stock,
       material,
-      size,
+      variants,
       shape,
       color,
       style,
@@ -273,8 +295,25 @@ export const updateProduct = async (req, res) => {
       refundPolicyRequiredCondition,
     } = req.body;
 
+    let parsedVariants = product.variants || [];
+    if (variants !== undefined) {
+      try {
+        parsedVariants = typeof variants === "string" ? JSON.parse(variants) : variants;
+      } catch (e) {
+        return sendError(res, 400, "Invalid variants format.");
+      }
+    }
+
     // ── Price & discount ───────────────────────
-    const parsedPrice = price !== undefined ? parseFloat(price) : product.price;
+    let calculatedPrice = price !== undefined ? parseFloat(price) : product.price;
+    if (parsedVariants && parsedVariants.length > 0) {
+      const minVariantPrice = Math.min(...parsedVariants.map(v => Number(v.price)));
+      if (!isNaN(minVariantPrice)) {
+        calculatedPrice = minVariantPrice;
+      }
+    }
+    const parsedPrice = calculatedPrice;
+
     const parsedDiscountPrice =
       discountPrice !== undefined
         ? discountPrice === "" || discountPrice === null
@@ -359,7 +398,7 @@ export const updateProduct = async (req, res) => {
       sku: sku?.trim() ? sku.trim().toUpperCase() : product.sku,
       stock: stock !== undefined ? parseInt(stock, 10) : product.stock,
       material: material ?? product.material,
-      size: size ?? product.size,
+      variants: parsedVariants,
       shape: shape ?? product.shape,
       color: color ?? product.color,
       style: style ?? product.style,
