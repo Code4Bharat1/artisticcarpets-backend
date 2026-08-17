@@ -93,6 +93,13 @@ export const createProduct = async (req, res) => {
     }
 
     const parsedPrice = calculatedPrice;
+    
+    // Auto-calculate base stock from variants if present
+    let calculatedStock = (stock === "" || stock === undefined) ? 0 : parseInt(stock, 10);
+    if (parsedVariants.length > 0) {
+      calculatedStock = parsedVariants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+    }
+    const parsedStock = calculatedStock;
     const parsedDiscountPrice = discountPrice ? parseFloat(discountPrice) : null;
 
     // ── 3. Discount price validation ───────────
@@ -145,7 +152,7 @@ export const createProduct = async (req, res) => {
       discountPrice: parsedDiscountPrice,
       discountPercentage,
       sku: finalSKU,
-      stock: (stock === "" || stock === undefined) ? 0 : parseInt(stock, 10),
+      stock: parsedStock,
       material,
       variants: parsedVariants,
       shape,
@@ -323,6 +330,13 @@ export const updateProduct = async (req, res) => {
     }
     const parsedPrice = calculatedPrice;
 
+    // Auto-calculate base stock from variants if present
+    let calculatedStock = (stock === "" || stock === undefined) ? product.stock : parseInt(stock, 10);
+    if (parsedVariants && parsedVariants.length > 0) {
+      calculatedStock = parsedVariants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+    }
+    const parsedStock = calculatedStock;
+
     const parsedDiscountPrice =
       discountPrice !== undefined
         ? discountPrice === "" || discountPrice === null
@@ -426,7 +440,7 @@ export const updateProduct = async (req, res) => {
       discountPrice: parsedDiscountPrice,
       discountPercentage,
       sku: sku?.trim() ? sku.trim().toUpperCase() : product.sku,
-      stock: (stock === "" || stock === undefined) ? product.stock : parseInt(stock, 10),
+      stock: parsedStock,
       material: material ?? product.material,
       variants: parsedVariants,
       shape: shape ?? product.shape,
