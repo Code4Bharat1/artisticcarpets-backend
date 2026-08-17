@@ -102,7 +102,9 @@ router.get("/products/admin-list", protect, isAdmin, getAdminProducts);
  * Body: multipart/form-data
  */
 router.post(
-  "/",
+  "/products",
+  protect,
+  isAdmin,
   uploadProductImages,
   handleUploadError,
   createProductValidation,
