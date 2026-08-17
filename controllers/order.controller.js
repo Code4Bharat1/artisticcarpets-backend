@@ -39,7 +39,18 @@ export const createOrder = asyncHandler(async (req, res) => {
       return errorResponse(res, `Insufficient stock for: ${product.title}`, 400);
     }
 
-    const unitPrice = product.discountPrice || product.price;
+    let unitPrice = item.price;
+    
+    if (unitPrice === undefined || unitPrice === null || isNaN(unitPrice)) {
+      unitPrice = product.discountPrice || product.price;
+      if (item.variant && product.variants && product.variants.length > 0) {
+        const selectedVariant = product.variants.id(item.variant);
+        if (selectedVariant) {
+          unitPrice = selectedVariant.discountPrice || selectedVariant.price;
+        }
+      }
+    }
+
     const totalPrice = unitPrice * item.quantity;
     subtotal += totalPrice;
 

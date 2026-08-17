@@ -7,7 +7,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 // @route   POST /api/payment/razorpay/order
 // @access  Private
 export const createRazorpayOrder = asyncHandler(async (req, res) => {
-  const { amount, currency = "USD" } = req.body;
+const { amount, currency = "INR" } = req.body;
 
   if (!amount) {
     return errorResponse(res, "Please provide amount", 400);
