@@ -56,7 +56,7 @@ export const getUserComplaints = asyncHandler(async (req, res) => {
 // @access  Private/Admin
 export const getAllComplaints = asyncHandler(async (req, res) => {
   const complaints = await Complaint.find({})
-    .populate("user", "name email")
+    .populate("user", "firstName lastName email")
     .sort({ createdAt: -1 });
   return successResponse(res, { data: complaints }, "All complaints retrieved successfully");
 });
